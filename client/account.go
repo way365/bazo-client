@@ -4,9 +4,9 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/bazo-blockchain/bazo-client/network"
-	"github.com/bazo-blockchain/bazo-miner/miner"
-	"github.com/bazo-blockchain/bazo-miner/protocol"
+	"github.com/julwil/bazo-client/network"
+	"github.com/julwil/bazo-miner/miner"
+	"github.com/julwil/bazo-miner/protocol"
 )
 
 type Account struct {

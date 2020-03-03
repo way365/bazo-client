@@ -4,78 +4,78 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
-	"github.com/bazo-blockchain/bazo-client/network"
-	"github.com/bazo-blockchain/bazo-client/util"
-	"github.com/bazo-blockchain/bazo-miner/crypto"
-	"github.com/bazo-blockchain/bazo-miner/p2p"
-	"github.com/bazo-blockchain/bazo-miner/protocol"
+	"github.com/julwil/bazo-client/network"
+	"github.com/julwil/bazo-client/util"
+	"github.com/julwil/bazo-miner/crypto"
+	"github.com/julwil/bazo-miner/p2p"
+	"github.com/julwil/bazo-miner/protocol"
 	"github.com/urfave/cli"
 	"log"
 )
 
 type fundsArgs struct {
-	header			int
-	fromWalletFile	string
-	toWalletFile	string
-	toAddress		string
-	multisigFile	string
-	amount			uint64
-	fee				uint64
-	txcount		    int
+	header         int
+	fromWalletFile string
+	toWalletFile   string
+	toAddress      string
+	multisigFile   string
+	amount         uint64
+	fee            uint64
+	txcount        int
 }
 
 func GetFundsCommand(logger *log.Logger) cli.Command {
-	return cli.Command {
-		Name:	"funds",
-		Usage:	"send funds from one account to another",
-		Action:	func(c *cli.Context) error {
+	return cli.Command{
+		Name:  "funds",
+		Usage: "send funds from one account to another",
+		Action: func(c *cli.Context) error {
 			args := &fundsArgs{
-				header: 		c.Int("header"),
+				header:         c.Int("header"),
 				fromWalletFile: c.String("from"),
-				toWalletFile: 	c.String("to"),
-				toAddress: 		c.String("toAddress"),
-				multisigFile: 	c.String("multisig"),
-				amount: 		c.Uint64("amount"),
-				fee: 			c.Uint64("fee"),
-				txcount:		c.Int("txcount"),
+				toWalletFile:   c.String("to"),
+				toAddress:      c.String("toAddress"),
+				multisigFile:   c.String("multisig"),
+				amount:         c.Uint64("amount"),
+				fee:            c.Uint64("fee"),
+				txcount:        c.Int("txcount"),
 			}
 
 			return sendFunds(args, logger)
 		},
-		Flags:	[]cli.Flag {
-			cli.IntFlag {
-				Name: 	"header",
-				Usage: 	"header flag",
-				Value:	0,
+		Flags: []cli.Flag{
+			cli.IntFlag{
+				Name:  "header",
+				Usage: "header flag",
+				Value: 0,
 			},
-			cli.StringFlag {
-				Name: 	"from",
-				Usage: 	"load the sender's private key from `FILE`",
+			cli.StringFlag{
+				Name:  "from",
+				Usage: "load the sender's private key from `FILE`",
 			},
-			cli.StringFlag {
-				Name: 	"to",
-				Usage: 	"load the recipient's public key from `FILE`",
+			cli.StringFlag{
+				Name:  "to",
+				Usage: "load the recipient's public key from `FILE`",
 			},
-			cli.StringFlag {
-				Name: 	"toAddress",
-				Usage: 	"the recipient's 128 byze public address",
+			cli.StringFlag{
+				Name:  "toAddress",
+				Usage: "the recipient's 128 byze public address",
 			},
-			cli.Uint64Flag {
-				Name: 	"amount",
-				Usage:	"specify the amount to send",
+			cli.Uint64Flag{
+				Name:  "amount",
+				Usage: "specify the amount to send",
 			},
-			cli.Uint64Flag {
-				Name: 	"fee",
-				Usage:	"specify the fee",
-				Value: 	1,
+			cli.Uint64Flag{
+				Name:  "fee",
+				Usage: "specify the fee",
+				Value: 1,
 			},
-			cli.IntFlag {
-				Name: 	"txcount",
-				Usage:	"the sender's current transaction counter",
+			cli.IntFlag{
+				Name:  "txcount",
+				Usage: "the sender's current transaction counter",
 			},
-			cli.StringFlag {
-				Name: 	"multisig",
-				Usage: 	"load multi-signature server’s private key from `FILE`",
+			cli.StringFlag{
+				Name:  "multisig",
+				Usage: "load multi-signature server’s private key from `FILE`",
 			},
 		},
 	}

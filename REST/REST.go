@@ -2,9 +2,9 @@ package REST
 
 import (
 	"encoding/json"
-	"github.com/bazo-blockchain/bazo-client/util"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/julwil/bazo-client/util"
 	"log"
 	"net/http"
 )

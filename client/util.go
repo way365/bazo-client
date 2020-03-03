@@ -1,12 +1,12 @@
 package client
 
 import (
-	"github.com/bazo-blockchain/bazo-client/util"
+	"github.com/julwil/bazo-client/util"
 	"log"
 )
 
 var (
-	logger     *log.Logger
+	logger *log.Logger
 )
 
 func InitLogging() {

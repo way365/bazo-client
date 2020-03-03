@@ -2,56 +2,58 @@ package cli
 
 import (
 	"errors"
-	"github.com/bazo-blockchain/bazo-client/network"
-	"github.com/bazo-blockchain/bazo-client/util"
-	"github.com/bazo-blockchain/bazo-miner/crypto"
-	"github.com/bazo-blockchain/bazo-miner/p2p"
-	"github.com/bazo-blockchain/bazo-miner/protocol"
+	"github.com/julwil/bazo-client/network"
+	"github.com/julwil/bazo-client/util"
+	"github.com/julwil/bazo-miner/crypto"
+	"github.com/julwil/bazo-miner/p2p"
+	"github.com/julwil/bazo-miner/protocol"
 	"github.com/urfave/cli"
 	"log"
 )
 
 type networkArgs struct {
-	header      	int
-	fee         	uint64
-	txcount     	int
-	rootWalletFile 	string
-	optionId    	uint8
-	payload     	uint64
+	header         int
+	fee            uint64
+	txcount        int
+	rootWalletFile string
+	optionId       uint8
+	payload        uint64
 }
 
 type configOption struct {
-	id				uint8
-	name			string
-	usage			string
+	id    uint8
+	name  string
+	usage string
 }
 
 func GetNetworkCommand(logger *log.Logger) cli.Command {
-	options := []configOption {
-		{ id: 1, name: "setBlockSize", usage: "set the size of blocks (in bytes)" },
-		{ id: 2, name: "setDifficultyInterval", usage: "set the difficulty interval (in number of blocks)" },
-		{ id: 3, name: "setMinimumFee", usage: "set the minimum fee (in Bazo coins)" },
-		{ id: 4, name: "setBlockInterval", usage: "set the block interval (in seconds)" },
-		{ id: 5, name: "setBlockReward", usage: "set the block reward (in Bazo coins)" },
+	options := []configOption{
+		{id: 1, name: "setBlockSize", usage: "set the size of blocks (in bytes)"},
+		{id: 2, name: "setDifficultyInterval", usage: "set the difficulty interval (in number of blocks)"},
+		{id: 3, name: "setMinimumFee", usage: "set the minimum fee (in Bazo coins)"},
+		{id: 4, name: "setBlockInterval", usage: "set the block interval (in seconds)"},
+		{id: 5, name: "setBlockReward", usage: "set the block reward (in Bazo coins)"},
 	}
 
-	command := cli.Command {
-		Name:	"network",
-		Usage:	"configure the network",
-		Action:	func(c *cli.Context) error {
+	command := cli.Command{
+		Name:  "network",
+		Usage: "configure the network",
+		Action: func(c *cli.Context) error {
 			optionsSetByUser := 0
 			for _, option := range options {
-				if !c.IsSet(option.name) { continue }
+				if !c.IsSet(option.name) {
+					continue
+				}
 
 				optionsSetByUser++
 
-				args := &networkArgs {
-					header:      	c.Int("header"),
-					fee:         	c.Uint64("fee"),
+				args := &networkArgs{
+					header:         c.Int("header"),
+					fee:            c.Uint64("fee"),
 					rootWalletFile: c.String("rootwallet"),
-					optionId:    	option.id,
-					payload:     	c.Uint64(option.name),
-					txcount:		c.Int("txcount"),
+					optionId:       option.id,
+					payload:        c.Uint64(option.name),
+					txcount:        c.Int("txcount"),
 				}
 
 				err := configureNetwork(args, logger)
@@ -66,30 +68,30 @@ func GetNetworkCommand(logger *log.Logger) cli.Command {
 
 			return nil
 		},
-		Flags: []cli.Flag {
-			cli.IntFlag {
-				Name: 	"header",
-				Usage: 	"header flag",
-				Value:	0,
+		Flags: []cli.Flag{
+			cli.IntFlag{
+				Name:  "header",
+				Usage: "header flag",
+				Value: 0,
 			},
-			cli.Uint64Flag {
-				Name: 	"fee",
-				Usage:	"specify the fee",
-				Value: 	1,
+			cli.Uint64Flag{
+				Name:  "fee",
+				Usage: "specify the fee",
+				Value: 1,
 			},
-			cli.IntFlag {
-				Name: 	"txcount",
-				Usage:	"the sender's current transaction counter",
+			cli.IntFlag{
+				Name:  "txcount",
+				Usage: "the sender's current transaction counter",
 			},
-			cli.StringFlag {
-				Name: 	"rootwallet",
-				Usage: 	"load root's public key from `FILE`",
+			cli.StringFlag{
+				Name:  "rootwallet",
+				Usage: "load root's public key from `FILE`",
 			},
 		},
 	}
 
 	for _, option := range options {
-		flag := cli.Uint64Flag { Name: option.name, Usage: option.usage }
+		flag := cli.Uint64Flag{Name: option.name, Usage: option.usage}
 		command.Flags = append(command.Flags, flag)
 	}
 

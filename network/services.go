@@ -1,7 +1,7 @@
 package network
 
 import (
-	"github.com/bazo-blockchain/bazo-client/util"
+	"github.com/julwil/bazo-client/util"
 	"time"
 )
 

@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/bazo-blockchain/bazo-client/cli"
-	"github.com/bazo-blockchain/bazo-client/client"
-	"github.com/bazo-blockchain/bazo-client/cstorage"
-	"github.com/bazo-blockchain/bazo-client/network"
-	"github.com/bazo-blockchain/bazo-client/util"
-	"github.com/bazo-blockchain/bazo-miner/p2p"
+	"github.com/julwil/bazo-client/cli"
+	"github.com/julwil/bazo-client/client"
+	"github.com/julwil/bazo-client/cstorage"
+	"github.com/julwil/bazo-client/network"
+	"github.com/julwil/bazo-client/util"
+	"github.com/julwil/bazo-miner/p2p"
 	cli2 "github.com/urfave/cli"
 	"os"
 )
@@ -25,7 +25,7 @@ func main() {
 	app.Name = "bazo-client"
 	app.Usage = "the command line interface for interacting with the Bazo blockchain implemented in Go."
 	app.Version = "1.0.0"
-	app.Commands = []cli2.Command {
+	app.Commands = []cli2.Command{
 		cli.GetAccountCommand(logger),
 		cli.GetFundsCommand(logger),
 		cli.GetNetworkCommand(logger),

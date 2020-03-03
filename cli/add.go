@@ -2,41 +2,41 @@ package cli
 
 import (
 	"errors"
-	"github.com/bazo-blockchain/bazo-miner/crypto"
-	"github.com/bazo-blockchain/bazo-miner/protocol"
+	"github.com/julwil/bazo-miner/crypto"
+	"github.com/julwil/bazo-miner/protocol"
 	"github.com/urfave/cli"
 	"log"
 	"math/big"
 )
 
 type addAccountArgs struct {
-	header			int
-	fee				uint64
-	rootWalletFile	string
-	address			string
+	header         int
+	fee            uint64
+	rootWalletFile string
+	address        string
 }
 
 func getAddAccountCommand(logger *log.Logger) cli.Command {
-	return cli.Command {
-		Name: "add",
-			Usage: "add an existing account",
-			Action: func(c *cli.Context) error {
-			args := &addAccountArgs {
-				header: 		c.Int("header"),
-				fee: 			c.Uint64("fee"),
+	return cli.Command{
+		Name:  "add",
+		Usage: "add an existing account",
+		Action: func(c *cli.Context) error {
+			args := &addAccountArgs{
+				header:         c.Int("header"),
+				fee:            c.Uint64("fee"),
 				rootWalletFile: c.String("rootwallet"),
-				address: 		c.String("address"),
+				address:        c.String("address"),
 			}
 
 			return addAccount(args, logger)
 		},
-			Flags: []cli.Flag {
+		Flags: []cli.Flag{
 			headerFlag,
 			feeFlag,
 			rootkeyFlag,
-			cli.StringFlag {
-				Name: 	"address",
-				Usage: 	"the account's address",
+			cli.StringFlag{
+				Name:  "address",
+				Usage: "the account's address",
 			},
 		},
 	}

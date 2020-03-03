@@ -2,8 +2,8 @@ package cstorage
 
 import (
 	"fmt"
-	"github.com/bazo-blockchain/bazo-client/util"
 	"github.com/boltdb/bolt"
+	"github.com/julwil/bazo-client/util"
 	"log"
 	"time"
 )

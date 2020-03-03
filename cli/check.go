@@ -2,39 +2,39 @@ package cli
 
 import (
 	"errors"
-	"github.com/bazo-blockchain/bazo-client/client"
-	"github.com/bazo-blockchain/bazo-miner/crypto"
+	"github.com/julwil/bazo-client/client"
+	"github.com/julwil/bazo-miner/crypto"
 	"github.com/urfave/cli"
 	"log"
 	"math/big"
 )
 
 type checkAccountArgs struct {
-	address		string
-	walletFile	string
+	address    string
+	walletFile string
 }
 
 func getCheckAccountCommand(logger *log.Logger) cli.Command {
-	return cli.Command {
-		Name: "check",
+	return cli.Command{
+		Name:  "check",
 		Usage: "check account state",
-			Action: func(c *cli.Context) error {
-			args := &checkAccountArgs {
-				address:	c.String("address"),
-				walletFile:	c.String("wallet"),
+		Action: func(c *cli.Context) error {
+			args := &checkAccountArgs{
+				address:    c.String("address"),
+				walletFile: c.String("wallet"),
 			}
 
 			return checkAccount(args, logger)
 		},
-		Flags: []cli.Flag {
-			cli.StringFlag {
-				Name: 	"address",
-				Usage: 	"the account's 128 byte address",
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  "address",
+				Usage: "the account's 128 byte address",
 			},
-			cli.StringFlag {
-				Name: 	"wallet",
-				Usage: 	"load the account's 128 byte address from `FILE`",
-				Value: 	"wallet.txt",
+			cli.StringFlag{
+				Name:  "wallet",
+				Usage: "load the account's 128 byte address from `FILE`",
+				Value: "wallet.txt",
 			},
 		},
 	}

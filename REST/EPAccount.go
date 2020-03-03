@@ -1,10 +1,10 @@
 package REST
 
 import (
-	"github.com/bazo-blockchain/bazo-client/client"
-	"github.com/bazo-blockchain/bazo-client/network"
-	"github.com/bazo-blockchain/bazo-miner/protocol"
 	"github.com/gorilla/mux"
+	"github.com/julwil/bazo-client/client"
+	"github.com/julwil/bazo-client/network"
+	"github.com/julwil/bazo-miner/protocol"
 	"math/big"
 	"net/http"
 )

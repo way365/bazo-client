@@ -1,8 +1,8 @@
 package cstorage
 
 import (
-	"github.com/bazo-blockchain/bazo-miner/protocol"
 	"github.com/boltdb/bolt"
+	"github.com/julwil/bazo-miner/protocol"
 )
 
 func ReadBlockHeader(hash [32]byte) (header *protocol.Block) {
