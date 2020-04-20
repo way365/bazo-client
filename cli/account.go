@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"fmt"
 	"github.com/julwil/bazo-client/network"
 	"github.com/julwil/bazo-client/util"
 	"github.com/julwil/bazo-miner/p2p"
@@ -42,7 +41,6 @@ func GetAccountCommand(logger *log.Logger) cli.Command {
 }
 
 func sendAccountTx(tx protocol.Transaction, logger *log.Logger) error {
-	fmt.Printf("chash: %x\n", tx.Hash())
 
 	if err := network.SendTx(util.Config.BootstrapIpport, tx, p2p.ACCTX_BRDCST); err != nil {
 		logger.Printf("%v\n", err)
