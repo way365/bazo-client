@@ -52,14 +52,14 @@ bazo-client account check [command options] [arguments...]
 ```
 
 Options
-* `--file`: Load the 128 byte address from a file
+* `--wallet`: Load the 128 byte address from a file
 * `--address`: Instead of passing the account's address by file with `--file`, you can also directly pass the 128 byte address
 
 Examples
 
 ```bash
-bazo-client account check b978...<120 byte omitted>...e86ba
-bazo-client account check myaccount.txt 
+bazo-client account check --wallet WalletA.txt 
+bazo-client account check --address b978...<120 byte omitted>...e86ba
 ```
 
 #### Create Account
