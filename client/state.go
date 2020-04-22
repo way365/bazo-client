@@ -172,7 +172,7 @@ func getState(acc *Account, lastTenTx []*FundsTxJson) (err error) {
 
 	relevantHeadersBeneficiary, relevantHeadersConfigBF := getRelevantBlockHeaders(pubKeyHash)
 
-	acc.Balance += activeParameters.Block_reward * uint64(len(relevantHeadersBeneficiary))
+	acc.Balance += activeParameters.BlockReward * uint64(len(relevantHeadersBeneficiary))
 
 	relevantBlocks, err := getRelevantBlocks(relevantHeadersConfigBF)
 	for _, block := range relevantBlocks {
