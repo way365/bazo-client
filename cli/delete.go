@@ -17,7 +17,6 @@ type deleteTxArgs struct {
 	fee                uint64
 	txToDeleteHash     string
 	txIssuerWalletFile string
-	txcount            int
 }
 
 func GetDeleteTxCommand(logger *log.Logger) cli.Command {
@@ -30,7 +29,6 @@ func GetDeleteTxCommand(logger *log.Logger) cli.Command {
 				fee:                c.Uint64("fee"),
 				txToDeleteHash:     c.String("txHash"),
 				txIssuerWalletFile: c.String("txIssuer"),
-				txcount:            c.Int("txcount"),
 			}
 
 			return deleteTx(args, logger)
@@ -53,10 +51,6 @@ func GetDeleteTxCommand(logger *log.Logger) cli.Command {
 			cli.StringFlag{
 				Name:  "txIssuer",
 				Usage: "load the tx issuer's public key from `FILE`",
-			},
-			cli.IntFlag{
-				Name:  "txcount",
-				Usage: "the sender's current transaction counter",
 			},
 		},
 	}
@@ -91,7 +85,6 @@ func deleteTx(args *deleteTxArgs, logger *log.Logger) error {
 		txToDeleteHash,
 		protocol.SerializeHashContent(issuerAddress),
 		issuerPrivateKey,
-		uint32(args.txcount),
 	)
 
 	if err != nil {
