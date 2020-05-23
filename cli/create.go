@@ -50,26 +50,36 @@ func createAccount(args *createAccountArgs, logger *log.Logger) error {
 		return err
 	}
 
-	privKey, err := crypto.ExtractECDSAKeyFromFile(args.rootWalletFile)
+	rootPrivKey, err := crypto.ExtractECDSAKeyFromFile(args.rootWalletFile)
 	if err != nil {
 		return err
 	}
 
-	var newKey *ecdsa.PrivateKey
-	//Write the public key to the given textfile
+	// Private Key
+	var newPrivKey *ecdsa.PrivateKey
+
+	tx, newPrivKey, err := protocol.ConstrAccTx(
+		byte(args.header),
+		uint64(args.fee),
+		[64]byte{},
+		rootPrivKey,
+		nil,
+		nil,
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+
+	//Write the private key to the given textfile
 	file, err := os.Create(args.walletFile)
 	if err != nil {
 		return err
 	}
 
-	tx, newKey, err := protocol.ConstrAccTx(byte(args.header), uint64(args.fee), [64]byte{}, privKey, nil, nil)
-	if err != nil {
-		return err
-	}
-
-	_, err = file.WriteString(string(newKey.X.Text(16)) + "\n")
-	_, err = file.WriteString(string(newKey.Y.Text(16)) + "\n")
-	_, err = file.WriteString(string(newKey.D.Text(16)) + "\n")
+	_, err = file.WriteString(string(newPrivKey.X.Text(16)) + "\n")
+	_, err = file.WriteString(string(newPrivKey.Y.Text(16)) + "\n")
+	_, err = file.WriteString(string(newPrivKey.D.Text(16)) + "\n")
 
 	if err != nil {
 		return errors.New(fmt.Sprintf("failed to write key to file %v", args.walletFile))

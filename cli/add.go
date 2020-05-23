@@ -48,7 +48,7 @@ func addAccount(args *addAccountArgs, logger *log.Logger) error {
 		return err
 	}
 
-	privKey, err := crypto.ExtractECDSAKeyFromFile(args.rootWalletFile)
+	rootPrivKey, err := crypto.ExtractECDSAKeyFromFile(args.rootWalletFile)
 	if err != nil {
 		return err
 	}
@@ -57,7 +57,15 @@ func addAccount(args *addAccountArgs, logger *log.Logger) error {
 	newPubInt, _ := new(big.Int).SetString(args.address, 16)
 	copy(newAddress[:], newPubInt.Bytes())
 
-	tx, _, err := protocol.ConstrAccTx(byte(args.header), uint64(args.fee), newAddress, privKey, nil, nil)
+	tx, _, err := protocol.ConstrAccTx(
+		byte(args.header),
+		uint64(args.fee),
+		newAddress,
+		rootPrivKey,
+		nil,
+		nil,
+		nil,
+	)
 	if err != nil {
 		return err
 	}
