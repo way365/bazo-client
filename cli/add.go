@@ -10,10 +10,11 @@ import (
 )
 
 type addAccountArgs struct {
-	header         int
-	fee            uint64
-	rootWalletFile string
-	address        string
+	header             int
+	fee                uint64
+	rootWalletFile     string
+	address            string
+	chamHashParamsFile string
 }
 
 func getAddAccountCommand(logger *log.Logger) cli.Command {
@@ -22,10 +23,11 @@ func getAddAccountCommand(logger *log.Logger) cli.Command {
 		Usage: "add an existing account",
 		Action: func(c *cli.Context) error {
 			args := &addAccountArgs{
-				header:         c.Int("header"),
-				fee:            c.Uint64("fee"),
-				rootWalletFile: c.String("rootwallet"),
-				address:        c.String("address"),
+				header:             c.Int("header"),
+				fee:                c.Uint64("fee"),
+				rootWalletFile:     c.String("rootwallet"),
+				address:            c.String("address"),
+				chamHashParamsFile: c.String("chamHashParams"),
 			}
 
 			return addAccount(args, logger)
@@ -37,6 +39,10 @@ func getAddAccountCommand(logger *log.Logger) cli.Command {
 			cli.StringFlag{
 				Name:  "address",
 				Usage: "the account's address",
+			},
+			cli.StringFlag{
+				Name:  "chamHashParams",
+				Usage: "save new chameleon hash parameters to `FILE`",
 			},
 		},
 	}
@@ -53,6 +59,11 @@ func addAccount(args *addAccountArgs, logger *log.Logger) error {
 		return err
 	}
 
+	chamHashParams, err := crypto.GetOrCreateChamHashParamsFromFile(args.chamHashParamsFile)
+	if err != nil {
+		return err
+	}
+
 	var newAddress [64]byte
 	newPubInt, _ := new(big.Int).SetString(args.address, 16)
 	copy(newAddress[:], newPubInt.Bytes())
@@ -64,7 +75,7 @@ func addAccount(args *addAccountArgs, logger *log.Logger) error {
 		rootPrivKey,
 		nil,
 		nil,
-		nil,
+		chamHashParams,
 	)
 	if err != nil {
 		return err
@@ -88,6 +99,10 @@ func (args addAccountArgs) ValidateInput() error {
 
 	if len(args.address) != 128 {
 		return errors.New("invalid argument length: address")
+	}
+
+	if len(args.chamHashParamsFile) == 0 {
+		return errors.New("argument missing: chamHashParams")
 	}
 
 	return nil

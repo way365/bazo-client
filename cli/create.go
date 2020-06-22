@@ -12,10 +12,11 @@ import (
 )
 
 type createAccountArgs struct {
-	header         int
-	fee            uint64
-	rootWalletFile string
-	walletFile     string
+	header             int
+	fee                uint64
+	rootWalletFile     string
+	walletFile         string
+	chamHashParamsFile string
 }
 
 func getCreateAccountCommand(logger *log.Logger) cli.Command {
@@ -24,10 +25,11 @@ func getCreateAccountCommand(logger *log.Logger) cli.Command {
 		Usage: "create a new account and add it to the network",
 		Action: func(c *cli.Context) error {
 			args := &createAccountArgs{
-				header:         c.Int("header"),
-				fee:            c.Uint64("fee"),
-				rootWalletFile: c.String("rootwallet"),
-				walletFile:     c.String("wallet"),
+				header:             c.Int("header"),
+				fee:                c.Uint64("fee"),
+				rootWalletFile:     c.String("rootwallet"),
+				walletFile:         c.String("wallet"),
+				chamHashParamsFile: c.String("chamHashParams"),
 			}
 
 			return createAccount(args, logger)
@@ -39,6 +41,10 @@ func getCreateAccountCommand(logger *log.Logger) cli.Command {
 			cli.StringFlag{
 				Name:  "wallet",
 				Usage: "save new account's public private key to `FILE`",
+			},
+			cli.StringFlag{
+				Name:  "chamHashParams",
+				Usage: "save new chameleon hash parameters to `FILE`",
 			},
 		},
 	}
@@ -58,6 +64,11 @@ func createAccount(args *createAccountArgs, logger *log.Logger) error {
 	// Private Key
 	var newPrivKey *ecdsa.PrivateKey
 
+	chamHashParams, err := crypto.GetOrCreateChamHashParamsFromFile(args.chamHashParamsFile)
+	if err != nil {
+		return err
+	}
+
 	tx, newPrivKey, err := protocol.ConstrAccTx(
 		byte(args.header),
 		uint64(args.fee),
@@ -65,7 +76,7 @@ func createAccount(args *createAccountArgs, logger *log.Logger) error {
 		rootPrivKey,
 		nil,
 		nil,
-		nil,
+		chamHashParams,
 	)
 	if err != nil {
 		return err
@@ -99,6 +110,10 @@ func (args createAccountArgs) ValidateInput() error {
 
 	if len(args.walletFile) == 0 {
 		return errors.New("argument missing: walletFile")
+	}
+
+	if len(args.chamHashParamsFile) == 0 {
+		return errors.New("argument missing: chamHashParams")
 	}
 
 	return nil
