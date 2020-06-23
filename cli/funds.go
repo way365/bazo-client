@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
+	"github.com/julwil/bazo-client/cstorage"
 	"github.com/julwil/bazo-client/network"
 	"github.com/julwil/bazo-client/util"
 	"github.com/julwil/bazo-miner/crypto"
@@ -14,14 +15,16 @@ import (
 )
 
 type fundsArgs struct {
-	header         int
-	fromWalletFile string
-	toWalletFile   string
-	toAddress      string
-	multisigFile   string
-	amount         uint64
-	fee            uint64
-	txcount        int
+	header             int
+	fromWalletFile     string
+	toWalletFile       string
+	toAddress          string
+	multisigFile       string
+	chamHashParamsFile string
+	amount             uint64
+	fee                uint64
+	txcount            int
+	data               string
 }
 
 func GetFundsCommand(logger *log.Logger) cli.Command {
@@ -30,14 +33,16 @@ func GetFundsCommand(logger *log.Logger) cli.Command {
 		Usage: "send funds from one account to another",
 		Action: func(c *cli.Context) error {
 			args := &fundsArgs{
-				header:         c.Int("header"),
-				fromWalletFile: c.String("from"),
-				toWalletFile:   c.String("to"),
-				toAddress:      c.String("toAddress"),
-				multisigFile:   c.String("multisig"),
-				amount:         c.Uint64("amount"),
-				fee:            c.Uint64("fee"),
-				txcount:        c.Int("txcount"),
+				header:             c.Int("header"),
+				fromWalletFile:     c.String("from"),
+				toWalletFile:       c.String("to"),
+				toAddress:          c.String("toAddress"),
+				multisigFile:       c.String("multisig"),
+				chamHashParamsFile: c.String("chamHashParams"),
+				amount:             c.Uint64("amount"),
+				fee:                c.Uint64("fee"),
+				txcount:            c.Int("txcount"),
+				data:               c.String("data"),
 			}
 
 			return sendFunds(args, logger)
@@ -76,6 +81,14 @@ func GetFundsCommand(logger *log.Logger) cli.Command {
 			cli.StringFlag{
 				Name:  "multisig",
 				Usage: "load multi-signature server’s private key from `FILE`",
+			},
+			cli.StringFlag{
+				Name:  "chamHashParams",
+				Usage: "load the chameleon hash parameters from `FILE`",
+			},
+			cli.StringFlag{
+				Name:  "data",
+				Usage: "data field to add a message to the tx",
 			},
 		},
 	}
@@ -130,6 +143,9 @@ func sendFunds(args *fundsArgs, logger *log.Logger) error {
 	fromAddress := crypto.GetAddressFromPubKey(&fromPrivKey.PublicKey)
 	toAddress := crypto.GetAddressFromPubKey(toPubKey)
 
+	chamHashParams, err := crypto.GetOrCreateChamHashParamsFromFile(args.chamHashParamsFile)
+	chamHashCheckString := crypto.NewChameleonHashCheckString(chamHashParams)
+
 	tx, err := protocol.ConstrFundsTx(
 		byte(args.header),
 		uint64(args.amount),
@@ -139,7 +155,10 @@ func sendFunds(args *fundsArgs, logger *log.Logger) error {
 		protocol.SerializeHashContent(toAddress),
 		fromPrivKey,
 		multisigPrivKey,
-		nil)
+		chamHashCheckString,
+		chamHashParams,
+		[]byte(args.data),
+	)
 
 	if err != nil {
 		logger.Printf("%v\n", err)
@@ -149,9 +168,12 @@ func sendFunds(args *fundsArgs, logger *log.Logger) error {
 	if err := network.SendTx(util.Config.BootstrapIpport, tx, p2p.FUNDSTX_BRDCST); err != nil {
 		logger.Printf("%v\n", err)
 		return err
-	} else {
-		logger.Printf("Transaction successfully sent to network:\nTxHash: %x%v", tx.Hash(), tx)
 	}
+
+	txHash := tx.HashWithChamHashParams(chamHashParams)
+
+	logger.Printf("Transaction successfully sent to network:\nTxHash: %x%v", txHash, tx)
+	cstorage.WriteTransaction(txHash, tx)
 
 	return nil
 }

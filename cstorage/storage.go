@@ -14,7 +14,14 @@ var (
 )
 
 const (
-	ERROR_MSG = "Initiate storage aborted: "
+	ERROR_MSG                = "Initiate storage aborted: "
+	LAST_BLOCK_HEADER_BUCKET = "lastblockheader"
+	BLOCK_HEADER_BUCKET      = "blockheaders"
+	ACCOUNT_TX_BUCKET        = "account_transactions"
+	FUND_TX_BUCKET           = "fund_transactions"
+	CONFIG_TX_BUCKET         = "config_transactions"
+	STAKING_TX_BUCKET        = "staking_transactions"
+	DELETE_TX_BUCKET         = "delete_transactions"
 )
 
 //Entry function for the storage package
@@ -28,7 +35,7 @@ func Init(dbname string) {
 	}
 
 	db.Update(func(tx *bolt.Tx) error {
-		_, err = tx.CreateBucket([]byte("blockheaders"))
+		_, err = tx.CreateBucket([]byte(BLOCK_HEADER_BUCKET))
 		if err != nil {
 			return fmt.Errorf(ERROR_MSG+"Create bucket: %s", err)
 		}
@@ -37,11 +44,51 @@ func Init(dbname string) {
 	})
 
 	db.Update(func(tx *bolt.Tx) error {
-		_, err = tx.CreateBucket([]byte("lastblockheader"))
+		_, err = tx.CreateBucket([]byte(LAST_BLOCK_HEADER_BUCKET))
 		if err != nil {
 			return fmt.Errorf(ERROR_MSG+"Create bucket: %s", err)
 		}
 
+		return nil
+	})
+
+	db.Update(func(tx *bolt.Tx) error {
+		_, err = tx.CreateBucketIfNotExists([]byte(ACCOUNT_TX_BUCKET))
+		if err != nil {
+			return fmt.Errorf(ERROR_MSG+"Create bucket: %s", err)
+		}
+		return nil
+	})
+
+	db.Update(func(tx *bolt.Tx) error {
+		_, err = tx.CreateBucketIfNotExists([]byte(FUND_TX_BUCKET))
+		if err != nil {
+			return fmt.Errorf(ERROR_MSG+"Create bucket: %s", err)
+		}
+		return nil
+	})
+
+	db.Update(func(tx *bolt.Tx) error {
+		_, err = tx.CreateBucketIfNotExists([]byte(CONFIG_TX_BUCKET))
+		if err != nil {
+			return fmt.Errorf(ERROR_MSG+"Create bucket: %s", err)
+		}
+		return nil
+	})
+
+	db.Update(func(tx *bolt.Tx) error {
+		_, err = tx.CreateBucketIfNotExists([]byte(STAKING_TX_BUCKET))
+		if err != nil {
+			return fmt.Errorf(ERROR_MSG+"Create bucket: %s", err)
+		}
+		return nil
+	})
+
+	db.Update(func(tx *bolt.Tx) error {
+		_, err = tx.CreateBucketIfNotExists([]byte(DELETE_TX_BUCKET))
+		if err != nil {
+			return fmt.Errorf(ERROR_MSG+"Create bucket: %s", err)
+		}
 		return nil
 	})
 }

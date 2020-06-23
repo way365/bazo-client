@@ -82,6 +82,9 @@ func createAccount(args *createAccountArgs, logger *log.Logger) error {
 		return err
 	}
 
+	accAddress := protocol.SerializeHashContent(tx.PubKey)
+	crypto.ChamHashParamsMap[accAddress] = chamHashParams
+
 	//Write the private key to the given textfile
 	file, err := os.Create(args.walletFile)
 	if err != nil {
