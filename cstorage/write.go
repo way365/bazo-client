@@ -51,8 +51,8 @@ func WriteTransaction(txHash [32]byte, tx protocol.Transaction) (err error) {
 		bucket = CONFIG_TX_BUCKET
 	case *protocol.StakeTx:
 		bucket = STAKING_TX_BUCKET
-	case *protocol.DeleteTx:
-		bucket = DELETE_TX_BUCKET
+	case *protocol.UpdateTx:
+		bucket = UPDATE_TX_BUCKET
 	default:
 		return errors.New("invalid tx type")
 	}

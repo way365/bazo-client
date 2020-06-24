@@ -31,7 +31,7 @@ func main() {
 		cli.GetNetworkCommand(logger),
 		cli.GetRestCommand(),
 		cli.GetStakingCommand(logger),
-		cli.GetDeleteTxCommand(logger),
+		cli.GetUpdateTxCommand(logger),
 	}
 
 	err := app.Run(os.Args)

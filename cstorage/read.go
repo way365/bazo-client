@@ -41,7 +41,7 @@ func ReadLastBlockHeader() (header *protocol.Block) {
 func ReadTransaction(txHash [32]byte) (transaction protocol.Transaction) {
 	var encodedTx []byte
 
-	var accTx *protocol.FundsTx
+	var accTx *protocol.AccTx
 	db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(ACCOUNT_TX_BUCKET))
 		encodedTx = b.Get(txHash[:])
@@ -61,7 +61,7 @@ func ReadTransaction(txHash [32]byte) (transaction protocol.Transaction) {
 		return fundsTx.Decode(encodedTx)
 	}
 
-	var configTx *protocol.FundsTx
+	var configTx *protocol.ConfigTx
 	db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(CONFIG_TX_BUCKET))
 		encodedTx = b.Get(txHash[:])
@@ -71,7 +71,7 @@ func ReadTransaction(txHash [32]byte) (transaction protocol.Transaction) {
 		return configTx.Decode(encodedTx)
 	}
 
-	var stakingTx *protocol.FundsTx
+	var stakingTx *protocol.StakeTx
 	db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(STAKING_TX_BUCKET))
 		encodedTx = b.Get(txHash[:])
@@ -81,14 +81,14 @@ func ReadTransaction(txHash [32]byte) (transaction protocol.Transaction) {
 		return stakingTx.Decode(encodedTx)
 	}
 
-	var deleteTx *protocol.FundsTx
+	var updateTx *protocol.UpdateTx
 	db.View(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(DELETE_TX_BUCKET))
+		b := tx.Bucket([]byte(UPDATE_TX_BUCKET))
 		encodedTx = b.Get(txHash[:])
 		return nil
 	})
 	if encodedTx != nil {
-		return deleteTx.Decode(encodedTx)
+		return updateTx.Decode(encodedTx)
 	}
 
 	return nil

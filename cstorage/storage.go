@@ -21,7 +21,7 @@ const (
 	FUND_TX_BUCKET           = "fund_transactions"
 	CONFIG_TX_BUCKET         = "config_transactions"
 	STAKING_TX_BUCKET        = "staking_transactions"
-	DELETE_TX_BUCKET         = "delete_transactions"
+	UPDATE_TX_BUCKET         = "update_transactions"
 )
 
 //Entry function for the storage package
@@ -85,7 +85,7 @@ func Init(dbname string) {
 	})
 
 	db.Update(func(tx *bolt.Tx) error {
-		_, err = tx.CreateBucketIfNotExists([]byte(DELETE_TX_BUCKET))
+		_, err = tx.CreateBucketIfNotExists([]byte(UPDATE_TX_BUCKET))
 		if err != nil {
 			return fmt.Errorf(ERROR_MSG+"Create bucket: %s", err)
 		}

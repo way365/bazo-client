@@ -2,6 +2,7 @@ package cli
 
 import (
 	"errors"
+	"fmt"
 	"github.com/julwil/bazo-client/cstorage"
 	"github.com/julwil/bazo-client/network"
 	"github.com/julwil/bazo-client/util"
@@ -13,30 +14,30 @@ import (
 	"math/big"
 )
 
-type deleteTxArgs struct {
+type updateTxArgs struct {
 	header             int
 	fee                uint64
-	txToDeleteHash     string
+	txToUpdate         string
 	txIssuerWalletFile string
 	chamHashParamsFile string
-	newData            string
+	updateData         string
 }
 
-func GetDeleteTxCommand(logger *log.Logger) cli.Command {
+func GetUpdateTxCommand(logger *log.Logger) cli.Command {
 	return cli.Command{
-		Name:  "delete-tx",
-		Usage: "delete a specific transaction",
+		Name:  "update",
+		Usage: "update the data field of a specific transaction",
 		Action: func(c *cli.Context) error {
-			args := &deleteTxArgs{
+			args := &updateTxArgs{
 				header:             c.Int("header"),
 				fee:                c.Uint64("fee"),
-				txToDeleteHash:     c.String("txHash"),
-				txIssuerWalletFile: c.String("txIssuer"),
-				chamHashParamsFile: c.String("chamHashParams"),
-				newData:            c.String("newData"),
+				txToUpdate:         c.String("tx-hash"),
+				txIssuerWalletFile: c.String("tx-issuer"),
+				chamHashParamsFile: c.String("cham-hash-params"),
+				updateData:         c.String("update-data"),
 			}
 
-			return deleteTx(args, logger)
+			return updateTx(args, logger)
 		},
 		Flags: []cli.Flag{
 			cli.IntFlag{
@@ -50,26 +51,26 @@ func GetDeleteTxCommand(logger *log.Logger) cli.Command {
 				Value: 1,
 			},
 			cli.StringFlag{
-				Name:  "txHash",
-				Usage: "the 32-byte hash of the transaction to delete",
+				Name:  "tx-hash",
+				Usage: "the 32-byte hash of the transaction to be upddated",
 			},
 			cli.StringFlag{
-				Name:  "txIssuer",
+				Name:  "tx-issuer",
 				Usage: "load the tx issuer's public key from `FILE`",
 			},
 			cli.StringFlag{
-				Name:  "chamHashParams",
+				Name:  "cham-hash-params",
 				Usage: "load the chameleon hash parameters from `FILE`",
 			},
 			cli.StringFlag{
-				Name:  "newData",
+				Name:  "update-data",
 				Usage: "specify the new data that shall be updated on the tx",
 			},
 		},
 	}
 }
 
-func deleteTx(args *deleteTxArgs, logger *log.Logger) error {
+func updateTx(args *updateTxArgs, logger *log.Logger) error {
 	err := args.ValidateInput()
 	if err != nil {
 		return err
@@ -84,11 +85,11 @@ func deleteTx(args *deleteTxArgs, logger *log.Logger) error {
 	// Then, we retrieve the associated address from that private key
 	issuerAddress := crypto.GetAddressFromPubKey(&issuerPrivateKey.PublicKey)
 
-	// Then, we parse the hash of the tx that shall be deleted.
-	var txToDeleteHash [32]byte
-	if len(args.txToDeleteHash) == 64 {
-		newPubInt, _ := new(big.Int).SetString(args.txToDeleteHash, 16)
-		copy(txToDeleteHash[:], newPubInt.Bytes())
+	// Then, we parse the hash of the tx that shall be updated.
+	var txToUpdateHash [32]byte
+	if len(args.txToUpdate) == 64 {
+		newPubInt, _ := new(big.Int).SetString(args.txToUpdate, 16)
+		copy(txToUpdateHash[:], newPubInt.Bytes())
 	}
 
 	chamHashParams, err := crypto.GetOrCreateChamHashParamsFromFile(args.chamHashParamsFile)
@@ -96,15 +97,15 @@ func deleteTx(args *deleteTxArgs, logger *log.Logger) error {
 		return errors.New("no chameleon hash parameter files found with given parameters")
 	}
 
-	newData := []byte(args.newData)
+	newData := []byte(args.updateData)
 	// We create a new check string for TxToDelete to create a hash collision using chameleon hashing.
-	newChamHashCheckString := generateCollisionCheckString(txToDeleteHash, chamHashParams, newData)
+	newChamHashCheckString := generateCollisionCheckString(txToUpdateHash, chamHashParams, newData)
 
-	// Finally, we create the delete-tx.
-	tx, err := protocol.ConstrDeleteTx(
+	// Finally, we create the update-tx.
+	tx, err := protocol.ConstrUpdateTx(
 		byte(args.header),
 		uint64(args.fee),
-		txToDeleteHash,
+		txToUpdateHash,
 		newChamHashCheckString,
 		newData,
 		protocol.SerializeHashContent(issuerAddress),
@@ -117,7 +118,7 @@ func deleteTx(args *deleteTxArgs, logger *log.Logger) error {
 	}
 
 	// Broadcast to the network
-	if err := network.SendTx(util.Config.BootstrapIpport, tx, p2p.DELTX_BRDCST); err != nil {
+	if err := network.SendTx(util.Config.BootstrapIpport, tx, p2p.UPDATETX_BRDCST); err != nil {
 		logger.Printf("%v\n", err)
 		return err
 	} else {
@@ -127,8 +128,8 @@ func deleteTx(args *deleteTxArgs, logger *log.Logger) error {
 	return nil
 }
 
-func (args deleteTxArgs) ValidateInput() error {
-	if len(args.txToDeleteHash) == 0 {
+func (args updateTxArgs) ValidateInput() error {
+	if len(args.txToUpdate) == 0 {
 		return errors.New("argument missing: txHash")
 	}
 
@@ -144,32 +145,32 @@ func generateCollisionCheckString(
 	parameters *crypto.ChameleonHashParameters,
 	newData []byte,
 ) (newCheckString *crypto.ChameleonHashCheckString) {
-	// First we need to query the Tx to delete.
-	var txToDelete protocol.Transaction
-	txToDelete = cstorage.ReadTransaction(txToDeleteHash)
+	// First we need to query the Tx to update.
+	var txToUpdate protocol.Transaction
+	txToUpdate = cstorage.ReadTransaction(txToDeleteHash)
 
-	//fmt.Printf("BEFORE update (%x): %s", txToDelete.HashWithChamHashParams(parameters), txToDelete.String())
+	fmt.Printf("TX to update %s", txToUpdate.String())
 
 	// Then we have to save the old check string and the SHA3 hash before we mutate the tx.
-	oldCheckString := txToDelete.GetChamHashCheckString()
-	oldSHA3 := txToDelete.SHA3()
+	oldCheckString := txToUpdate.GetChamHashCheckString()
+	oldSHA3 := txToUpdate.SHA3()
 	oldHashInput := oldSHA3[:]
 
 	// Now it's time to mutate the tx data.
-	txToDelete.SetData(newData)
+	txToUpdate.SetData(newData)
 
 	// Then we compute the new SHA3 hash. This hash incorporates the changes in the data field.
 	// With the new hash input we compute a hash collision and get the new check string.
-	newSHA3 := txToDelete.SHA3()
+	newSHA3 := txToUpdate.SHA3()
 	newHashInput := newSHA3[:]
 	newCheckString = crypto.GenerateChamHashCollision(parameters, oldCheckString, &oldHashInput, &newHashInput)
 
 	// We update the tx record in our local db.
-	txToDelete.SetChamHashCheckString(newCheckString)
+	txToUpdate.SetChamHashCheckString(newCheckString)
 
-	//fmt.Printf("\nAFTER update (%x): %s", txToDelete.HashWithChamHashParams(parameters), txToDelete.String())
+	//fmt.Printf("\nAFTER update (%x): %s", txToUpdate.HashWithChamHashParams(parameters), txToUpdate.String())
 
-	cstorage.WriteTransaction(txToDeleteHash, txToDelete)
+	cstorage.WriteTransaction(txToDeleteHash, txToUpdate)
 
 	return newCheckString
 }

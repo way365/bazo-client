@@ -17,6 +17,7 @@ type createAccountArgs struct {
 	rootWalletFile     string
 	walletFile         string
 	chamHashParamsFile string
+	data               string
 }
 
 func getCreateAccountCommand(logger *log.Logger) cli.Command {
@@ -30,6 +31,7 @@ func getCreateAccountCommand(logger *log.Logger) cli.Command {
 				rootWalletFile:     c.String("rootwallet"),
 				walletFile:         c.String("wallet"),
 				chamHashParamsFile: c.String("chamHashParams"),
+				data:               c.String("data"),
 			}
 
 			return createAccount(args, logger)
@@ -45,6 +47,10 @@ func getCreateAccountCommand(logger *log.Logger) cli.Command {
 			cli.StringFlag{
 				Name:  "chamHashParams",
 				Usage: "save new chameleon hash parameters to `FILE`",
+			},
+			cli.StringFlag{
+				Name:  "data",
+				Usage: "data field to add a message to the tx",
 			},
 		},
 	}
@@ -69,6 +75,8 @@ func createAccount(args *createAccountArgs, logger *log.Logger) error {
 		return err
 	}
 
+	chamHashCheckString := crypto.NewChameleonHashCheckString(chamHashParams)
+
 	tx, newPrivKey, err := protocol.ConstrAccTx(
 		byte(args.header),
 		uint64(args.fee),
@@ -77,6 +85,8 @@ func createAccount(args *createAccountArgs, logger *log.Logger) error {
 		nil,
 		nil,
 		chamHashParams,
+		chamHashCheckString,
+		[]byte(args.data),
 	)
 	if err != nil {
 		return err
@@ -99,7 +109,7 @@ func createAccount(args *createAccountArgs, logger *log.Logger) error {
 		return errors.New(fmt.Sprintf("failed to write key to file %v", args.walletFile))
 	}
 
-	return sendAccountTx(tx, logger)
+	return sendAccountTx(tx, chamHashParams, logger)
 }
 
 func (args createAccountArgs) ValidateInput() error {

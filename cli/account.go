@@ -1,8 +1,10 @@
 package cli
 
 import (
+	"github.com/julwil/bazo-client/cstorage"
 	"github.com/julwil/bazo-client/network"
 	"github.com/julwil/bazo-client/util"
+	"github.com/julwil/bazo-miner/crypto"
 	"github.com/julwil/bazo-miner/p2p"
 	"github.com/julwil/bazo-miner/protocol"
 	"github.com/urfave/cli"
@@ -40,13 +42,14 @@ func GetAccountCommand(logger *log.Logger) cli.Command {
 	}
 }
 
-func sendAccountTx(tx protocol.Transaction, logger *log.Logger) error {
+func sendAccountTx(tx protocol.Transaction, chamHashParams *crypto.ChameleonHashParameters, logger *log.Logger) error {
 
 	if err := network.SendTx(util.Config.BootstrapIpport, tx, p2p.ACCTX_BRDCST); err != nil {
 		logger.Printf("%v\n", err)
 		return err
 	} else {
-		logger.Printf("Transaction successfully sent to network:\nTxHash: %x%v", tx.Hash(), tx)
+		logger.Printf("Transaction successfully sent to network:\nTxHash: %x%v", tx.HashWithChamHashParams(chamHashParams), tx)
+		cstorage.WriteTransaction(tx.HashWithChamHashParams(chamHashParams), tx)
 	}
 
 	return nil

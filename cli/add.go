@@ -64,6 +64,8 @@ func addAccount(args *addAccountArgs, logger *log.Logger) error {
 		return err
 	}
 
+	chamHashCheckString := crypto.NewChameleonHashCheckString(chamHashParams)
+
 	var newAddress [64]byte
 	newPubInt, _ := new(big.Int).SetString(args.address, 16)
 	copy(newAddress[:], newPubInt.Bytes())
@@ -76,12 +78,14 @@ func addAccount(args *addAccountArgs, logger *log.Logger) error {
 		nil,
 		nil,
 		chamHashParams,
+		chamHashCheckString,
+		[]byte{},
 	)
 	if err != nil {
 		return err
 	}
 
-	return sendAccountTx(tx, logger)
+	return sendAccountTx(tx, chamHashParams, logger)
 }
 
 func (args addAccountArgs) ValidateInput() error {
