@@ -19,8 +19,9 @@ type updateTxArgs struct {
 	fee                uint64
 	txToUpdate         string
 	txIssuerWalletFile string
-	chamHashParamsFile string
-	updateData         string
+	chParamsFile       string
+	updateData         string // Data to be updated on the txToUpdate.
+	data               string // Data on this tx.
 }
 
 func GetUpdateTxCommand(logger *log.Logger) cli.Command {
@@ -33,8 +34,9 @@ func GetUpdateTxCommand(logger *log.Logger) cli.Command {
 				fee:                c.Uint64("fee"),
 				txToUpdate:         c.String("tx-hash"),
 				txIssuerWalletFile: c.String("tx-issuer"),
-				chamHashParamsFile: c.String("cham-hash-params"),
+				chParamsFile:       c.String("chparams"),
 				updateData:         c.String("update-data"),
+				data:               c.String("data"),
 			}
 
 			return updateTx(args, logger)
@@ -59,12 +61,16 @@ func GetUpdateTxCommand(logger *log.Logger) cli.Command {
 				Usage: "load the tx issuer's public key from `FILE`",
 			},
 			cli.StringFlag{
-				Name:  "cham-hash-params",
+				Name:  "chparams",
 				Usage: "load the chameleon hash parameters from `FILE`",
 			},
 			cli.StringFlag{
 				Name:  "update-data",
 				Usage: "specify the new data that shall be updated on the tx",
+			},
+			cli.StringFlag{
+				Name:  "data",
+				Usage: "specify the data on this tx.",
 			},
 		},
 	}
@@ -92,24 +98,28 @@ func updateTx(args *updateTxArgs, logger *log.Logger) error {
 		copy(txToUpdateHash[:], newPubInt.Bytes())
 	}
 
-	chamHashParams, err := crypto.GetOrCreateChamHashParamsFromFile(args.chamHashParamsFile)
+	chParams, err := crypto.GetOrCreateChParamsFromFile(args.chParamsFile)
+	chCheckString := crypto.NewChCheckString(chParams)
 	if err != nil {
 		return errors.New("no chameleon hash parameter files found with given parameters")
 	}
 
 	newData := []byte(args.updateData)
 	// We create a new check string for TxToDelete to create a hash collision using chameleon hashing.
-	newChamHashCheckString := generateCollisionCheckString(txToUpdateHash, chamHashParams, newData)
+	newChCheckString := generateCollisionCheckString(txToUpdateHash, chParams, newData)
 
 	// Finally, we create the update-tx.
 	tx, err := protocol.ConstrUpdateTx(
 		byte(args.header),
 		uint64(args.fee),
 		txToUpdateHash,
-		newChamHashCheckString,
+		newChCheckString,
 		newData,
 		protocol.SerializeHashContent(issuerAddress),
 		issuerPrivateKey,
+		chCheckString,
+		chParams,
+		[]byte(args.data),
 	)
 
 	if err != nil {
@@ -121,9 +131,12 @@ func updateTx(args *updateTxArgs, logger *log.Logger) error {
 	if err := network.SendTx(util.Config.BootstrapIpport, tx, p2p.UPDATETX_BRDCST); err != nil {
 		logger.Printf("%v\n", err)
 		return err
-	} else {
-		logger.Printf("Transaction successfully sent to network:\nTxHash: %x%v", tx.Hash(), tx)
 	}
+
+	txHash := tx.ChameleonHash(chParams)
+
+	logger.Printf("Transaction successfully sent to network:\nTxHash: %x%v", txHash, tx)
+	cstorage.WriteTransaction(txHash, tx)
 
 	return nil
 }
@@ -141,18 +154,23 @@ func (args updateTxArgs) ValidateInput() error {
 }
 
 func generateCollisionCheckString(
-	txToDeleteHash [32]byte,
-	parameters *crypto.ChameleonHashParameters,
+	txToUpdateHash [32]byte,
+	chParams *crypto.ChameleonHashParameters,
 	newData []byte,
-) (newCheckString *crypto.ChameleonHashCheckString) {
+) (newChCheckString *crypto.ChameleonHashCheckString) {
 	// First we need to query the Tx to update.
 	var txToUpdate protocol.Transaction
-	txToUpdate = cstorage.ReadTransaction(txToDeleteHash)
+	txToUpdate = cstorage.ReadTransaction(txToUpdateHash)
+	if txToUpdate == nil {
+		fmt.Printf("TX not found: %x", txToUpdateHash)
+
+		return
+	}
 
 	fmt.Printf("TX to update %s", txToUpdate.String())
 
 	// Then we have to save the old check string and the SHA3 hash before we mutate the tx.
-	oldCheckString := txToUpdate.GetChamHashCheckString()
+	oldChCheckString := txToUpdate.GetChCheckString()
 	oldSHA3 := txToUpdate.SHA3()
 	oldHashInput := oldSHA3[:]
 
@@ -163,14 +181,11 @@ func generateCollisionCheckString(
 	// With the new hash input we compute a hash collision and get the new check string.
 	newSHA3 := txToUpdate.SHA3()
 	newHashInput := newSHA3[:]
-	newCheckString = crypto.GenerateChamHashCollision(parameters, oldCheckString, &oldHashInput, &newHashInput)
+	newChCheckString = crypto.GenerateChCollision(chParams, oldChCheckString, &oldHashInput, &newHashInput)
 
-	// We update the tx record in our local db.
-	txToUpdate.SetChamHashCheckString(newCheckString)
+	// We update the txToUpdate record in our local db.
+	txToUpdate.SetChCheckString(newChCheckString)
+	cstorage.WriteTransaction(txToUpdateHash, txToUpdate)
 
-	//fmt.Printf("\nAFTER update (%x): %s", txToUpdate.HashWithChamHashParams(parameters), txToUpdate.String())
-
-	cstorage.WriteTransaction(txToDeleteHash, txToUpdate)
-
-	return newCheckString
+	return newChCheckString
 }

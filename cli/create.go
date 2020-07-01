@@ -12,12 +12,12 @@ import (
 )
 
 type createAccountArgs struct {
-	header             int
-	fee                uint64
-	rootWalletFile     string
-	walletFile         string
-	chamHashParamsFile string
-	data               string
+	header         int
+	fee            uint64
+	rootWalletFile string
+	walletFile     string
+	chParamsFile   string
+	data           string
 }
 
 func getCreateAccountCommand(logger *log.Logger) cli.Command {
@@ -26,12 +26,12 @@ func getCreateAccountCommand(logger *log.Logger) cli.Command {
 		Usage: "create a new account and add it to the network",
 		Action: func(c *cli.Context) error {
 			args := &createAccountArgs{
-				header:             c.Int("header"),
-				fee:                c.Uint64("fee"),
-				rootWalletFile:     c.String("rootwallet"),
-				walletFile:         c.String("wallet"),
-				chamHashParamsFile: c.String("chamHashParams"),
-				data:               c.String("data"),
+				header:         c.Int("header"),
+				fee:            c.Uint64("fee"),
+				rootWalletFile: c.String("rootwallet"),
+				walletFile:     c.String("wallet"),
+				chParamsFile:   c.String("chparams"),
+				data:           c.String("data"),
 			}
 
 			return createAccount(args, logger)
@@ -45,7 +45,7 @@ func getCreateAccountCommand(logger *log.Logger) cli.Command {
 				Usage: "save new account's public private key to `FILE`",
 			},
 			cli.StringFlag{
-				Name:  "chamHashParams",
+				Name:  "chparams",
 				Usage: "save new chameleon hash parameters to `FILE`",
 			},
 			cli.StringFlag{
@@ -70,12 +70,15 @@ func createAccount(args *createAccountArgs, logger *log.Logger) error {
 	// Private Key
 	var newPrivKey *ecdsa.PrivateKey
 
-	chamHashParams, err := crypto.GetOrCreateChamHashParamsFromFile(args.chamHashParamsFile)
+	chParams, err := crypto.GetOrCreateChParamsFromFile(args.chParamsFile)
 	if err != nil {
 		return err
 	}
 
-	chamHashCheckString := crypto.NewChameleonHashCheckString(chamHashParams)
+	// IMPORTANT: We need to sanitize the secret trapdoor key before we send it to the network.
+	chParams.TK = []byte{}
+
+	chCheckString := crypto.NewChCheckString(chParams)
 
 	tx, newPrivKey, err := protocol.ConstrAccTx(
 		byte(args.header),
@@ -84,16 +87,16 @@ func createAccount(args *createAccountArgs, logger *log.Logger) error {
 		rootPrivKey,
 		nil,
 		nil,
-		chamHashParams,
-		chamHashCheckString,
+		chParams,
+		chCheckString,
 		[]byte(args.data),
 	)
 	if err != nil {
 		return err
 	}
 
-	accAddress := protocol.SerializeHashContent(tx.PubKey)
-	crypto.ChamHashParamsMap[accAddress] = chamHashParams
+	//accAddress := protocol.SerializeHashContent(tx.PubKey)
+	//crypto.ChamHashParamsMap[accAddress] = chParams
 
 	//Write the private key to the given textfile
 	file, err := os.Create(args.walletFile)
@@ -109,7 +112,7 @@ func createAccount(args *createAccountArgs, logger *log.Logger) error {
 		return errors.New(fmt.Sprintf("failed to write key to file %v", args.walletFile))
 	}
 
-	return sendAccountTx(tx, chamHashParams, logger)
+	return sendAccountTx(tx, chParams, logger)
 }
 
 func (args createAccountArgs) ValidateInput() error {
@@ -125,7 +128,7 @@ func (args createAccountArgs) ValidateInput() error {
 		return errors.New("argument missing: walletFile")
 	}
 
-	if len(args.chamHashParamsFile) == 0 {
+	if len(args.chParamsFile) == 0 {
 		return errors.New("argument missing: chamHashParams")
 	}
 

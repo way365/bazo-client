@@ -59,12 +59,12 @@ func addAccount(args *addAccountArgs, logger *log.Logger) error {
 		return err
 	}
 
-	chamHashParams, err := crypto.GetOrCreateChamHashParamsFromFile(args.chamHashParamsFile)
+	chamHashParams, err := crypto.GetOrCreateChParamsFromFile(args.chamHashParamsFile)
 	if err != nil {
 		return err
 	}
 
-	chamHashCheckString := crypto.NewChameleonHashCheckString(chamHashParams)
+	chamHashCheckString := crypto.NewChCheckString(chamHashParams)
 
 	var newAddress [64]byte
 	newPubInt, _ := new(big.Int).SetString(args.address, 16)

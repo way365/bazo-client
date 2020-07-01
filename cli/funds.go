@@ -15,16 +15,16 @@ import (
 )
 
 type fundsArgs struct {
-	header             int
-	fromWalletFile     string
-	toWalletFile       string
-	toAddress          string
-	multisigFile       string
-	chamHashParamsFile string
-	amount             uint64
-	fee                uint64
-	txcount            int
-	data               string
+	header         int
+	fromWalletFile string
+	toWalletFile   string
+	toAddress      string
+	multisigFile   string
+	chParamsFile   string
+	amount         uint64
+	fee            uint64
+	txcount        int
+	data           string
 }
 
 func GetFundsCommand(logger *log.Logger) cli.Command {
@@ -33,16 +33,16 @@ func GetFundsCommand(logger *log.Logger) cli.Command {
 		Usage: "send funds from one account to another",
 		Action: func(c *cli.Context) error {
 			args := &fundsArgs{
-				header:             c.Int("header"),
-				fromWalletFile:     c.String("from"),
-				toWalletFile:       c.String("to"),
-				toAddress:          c.String("toAddress"),
-				multisigFile:       c.String("multisig"),
-				chamHashParamsFile: c.String("chamHashParams"),
-				amount:             c.Uint64("amount"),
-				fee:                c.Uint64("fee"),
-				txcount:            c.Int("txcount"),
-				data:               c.String("data"),
+				header:         c.Int("header"),
+				fromWalletFile: c.String("from"),
+				toWalletFile:   c.String("to"),
+				toAddress:      c.String("toAddress"),
+				multisigFile:   c.String("multisig"),
+				chParamsFile:   c.String("chparams"),
+				amount:         c.Uint64("amount"),
+				fee:            c.Uint64("fee"),
+				txcount:        c.Int("txcount"),
+				data:           c.String("data"),
 			}
 
 			return sendFunds(args, logger)
@@ -83,7 +83,7 @@ func GetFundsCommand(logger *log.Logger) cli.Command {
 				Usage: "load multi-signature server’s private key from `FILE`",
 			},
 			cli.StringFlag{
-				Name:  "chamHashParams",
+				Name:  "chparams",
 				Usage: "load the chameleon hash parameters from `FILE`",
 			},
 			cli.StringFlag{
@@ -143,8 +143,8 @@ func sendFunds(args *fundsArgs, logger *log.Logger) error {
 	fromAddress := crypto.GetAddressFromPubKey(&fromPrivKey.PublicKey)
 	toAddress := crypto.GetAddressFromPubKey(toPubKey)
 
-	chamHashParams, err := crypto.GetOrCreateChamHashParamsFromFile(args.chamHashParamsFile)
-	chamHashCheckString := crypto.NewChameleonHashCheckString(chamHashParams)
+	chParams, err := crypto.GetOrCreateChParamsFromFile(args.chParamsFile)
+	chCheckString := crypto.NewChCheckString(chParams)
 
 	tx, err := protocol.ConstrFundsTx(
 		byte(args.header),
@@ -155,8 +155,8 @@ func sendFunds(args *fundsArgs, logger *log.Logger) error {
 		protocol.SerializeHashContent(toAddress),
 		fromPrivKey,
 		multisigPrivKey,
-		chamHashCheckString,
-		chamHashParams,
+		chCheckString,
+		chParams,
 		[]byte(args.data),
 	)
 
@@ -170,7 +170,7 @@ func sendFunds(args *fundsArgs, logger *log.Logger) error {
 		return err
 	}
 
-	txHash := tx.HashWithChamHashParams(chamHashParams)
+	txHash := tx.ChameleonHash(chParams)
 
 	logger.Printf("Transaction successfully sent to network:\nTxHash: %x%v", txHash, tx)
 	cstorage.WriteTransaction(txHash, tx)

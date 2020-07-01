@@ -48,8 +48,8 @@ func sendAccountTx(tx protocol.Transaction, chamHashParams *crypto.ChameleonHash
 		logger.Printf("%v\n", err)
 		return err
 	} else {
-		logger.Printf("Transaction successfully sent to network:\nTxHash: %x%v", tx.HashWithChamHashParams(chamHashParams), tx)
-		cstorage.WriteTransaction(tx.HashWithChamHashParams(chamHashParams), tx)
+		logger.Printf("Transaction successfully sent to network:\nTxHash: %x%v", tx.ChameleonHash(chamHashParams), tx)
+		cstorage.WriteTransaction(tx.ChameleonHash(chamHashParams), tx)
 	}
 
 	return nil
