@@ -109,7 +109,7 @@ func fetchBlockHeader(blockHash []byte) (blockHeader *protocol.Block) {
 
 	blockHeader = blockHeaderI.(*protocol.Block)
 
-	logger.Printf("Fetch header with height %v\n", blockHeader.Height)
+	logger.Printf("Fetched header with height %v\n", blockHeader.Height)
 
 	return blockHeader
 }
@@ -134,22 +134,26 @@ func loadDB(last *protocol.Block, abort [32]byte, loaded []*protocol.Block) []*p
 	return loaded
 }
 
-func loadNetwork(last *protocol.Block, abort [32]byte, loaded []*protocol.Block) []*protocol.Block {
-	var ancestor *protocol.Block
-	if ancestor = fetchBlockHeader(last.PrevHash[:]); ancestor == nil {
-		for ancestor == nil {
-			logger.Printf("Try to fetch header %x with height %v again\n", last.Hash[:8], last.Height)
-			ancestor = fetchBlockHeader(last.PrevHash[:])
+func loadNetwork(block *protocol.Block, abort [32]byte, loaded []*protocol.Block) []*protocol.Block {
+	var queryHash [2 * miner.BLOCKHASH_SIZE]byte
+	copy(queryHash[:32], block.PrevHash[:])
+	copy(queryHash[32:], block.PrevHashWithoutTx[:])
+
+	var prevBlock *protocol.Block
+	if prevBlock = fetchBlockHeader(queryHash[:]); prevBlock == nil {
+		for prevBlock == nil {
+			logger.Printf("Try to fetch header %x with height %v again\n", block.Hash[:8], block.Height)
+			prevBlock = fetchBlockHeader(queryHash[:])
 		}
 	}
 
-	if last.PrevHash != abort {
-		loaded = loadNetwork(ancestor, abort, loaded)
+	if block.PrevHash != abort {
+		loaded = loadNetwork(prevBlock, abort, loaded)
 	}
 
-	saveAndLogBlockHeader(last)
+	saveAndLogBlockHeader(block)
 
-	loaded = append(loaded, last)
+	loaded = append(loaded, block)
 
 	return loaded
 }

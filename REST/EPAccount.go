@@ -13,7 +13,7 @@ func GetAccountEndpoint(w http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	param := params["id"]
 
-	logger.Printf("Incoming acc request for id: %v", param)
+	logger.Printf("Incoming acc request for account: %v", param)
 
 	var address [64]byte
 	var addressHash [32]byte
