@@ -26,12 +26,12 @@ func getCreateAccountCommand(logger *log.Logger) cli.Command {
 		Usage: "create a new account and add it to the network",
 		Action: func(c *cli.Context) error {
 			args := &createAccountArgs{
-				header:         c.Int("Header"),
-				fee:            c.Uint64("Fee"),
+				header:         c.Int("header"),
+				fee:            c.Uint64("fee"),
 				rootWalletFile: c.String("rootwallet"),
 				walletFile:     c.String("wallet"),
 				chParamsFile:   c.String("chparams"),
-				data:           c.String("Data"),
+				data:           c.String("data"),
 			}
 
 			return createAccount(args, logger)
@@ -44,12 +44,17 @@ func getCreateAccountCommand(logger *log.Logger) cli.Command {
 				Name:  "wallet",
 				Usage: "save new account's public private key to `FILE`",
 			},
+			cli.Uint64Flag{
+				Name:  "fee",
+				Usage: "specify the Fee",
+				Value: 1,
+			},
 			cli.StringFlag{
 				Name:  "chparams",
 				Usage: "save new chameleon hash parameters to `FILE`",
 			},
 			cli.StringFlag{
-				Name:  "Data",
+				Name:  "data",
 				Usage: "Data field to add a message to the tx",
 			},
 		},

@@ -10,7 +10,7 @@ type FundsArgs struct {
 	MultisigFile   string `json:"multisig"`
 	ChParamsFile   string `json:"chparams"`
 	Amount         uint64 `json:"amount"`
-	Fee            uint64
+	Fee            uint64 `json:"fee"`
 	TxCount        int    `json:"txcount"`
 	Data           string `json:"data"`
 }

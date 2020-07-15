@@ -30,7 +30,7 @@ func GetFundsCommand(logger *log.Logger) cli.Command {
 				return err
 			}
 
-			_,err = client.SendFunds(args, logger)
+			_, err = client.CreateSignSubmitFundsTx(args, logger)
 
 			return err
 		},

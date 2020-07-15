@@ -30,25 +30,25 @@ func GetUpdateTxCommand(logger *log.Logger) cli.Command {
 		Usage: "update the Data field of a specific transaction",
 		Action: func(c *cli.Context) error {
 			args := &updateTxArgs{
-				header:             c.Int("Header"),
-				fee:                c.Uint64("Fee"),
+				header:             c.Int("header"),
+				fee:                c.Uint64("fee"),
 				txToUpdate:         c.String("tx-hash"),
 				txIssuerWalletFile: c.String("tx-issuer"),
 				chParamsFile:       c.String("chparams"),
 				updateData:         c.String("update-Data"),
-				data:               c.String("Data"),
+				data:               c.String("data"),
 			}
 
 			return updateTx(args, logger)
 		},
 		Flags: []cli.Flag{
 			cli.IntFlag{
-				Name:  "Header",
+				Name:  "header",
 				Usage: "Header flag",
 				Value: 0,
 			},
 			cli.Uint64Flag{
-				Name:  "Fee",
+				Name:  "fee",
 				Usage: "specify the Fee",
 				Value: 1,
 			},
@@ -65,11 +65,11 @@ func GetUpdateTxCommand(logger *log.Logger) cli.Command {
 				Usage: "load the chameleon hash parameters from `FILE`",
 			},
 			cli.StringFlag{
-				Name:  "update-Data",
+				Name:  "update-data",
 				Usage: "specify the new Data that shall be updated on the tx",
 			},
 			cli.StringFlag{
-				Name:  "Data",
+				Name:  "data",
 				Usage: "specify the Data on this tx.",
 			},
 		},
