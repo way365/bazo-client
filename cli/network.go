@@ -30,7 +30,7 @@ func GetNetworkCommand(logger *log.Logger) cli.Command {
 	options := []configOption{
 		{id: 1, name: "setBlockSize", usage: "set the size of blocks (in bytes)"},
 		{id: 2, name: "setDifficultyInterval", usage: "set the difficulty interval (in number of blocks)"},
-		{id: 3, name: "setMinimumFee", usage: "set the minimum fee (in Bazo coins)"},
+		{id: 3, name: "setMinimumFee", usage: "set the minimum Fee (in Bazo coins)"},
 		{id: 4, name: "setBlockInterval", usage: "set the block interval (in seconds)"},
 		{id: 5, name: "setBlockReward", usage: "set the block reward (in Bazo coins)"},
 	}
@@ -48,12 +48,12 @@ func GetNetworkCommand(logger *log.Logger) cli.Command {
 				optionsSetByUser++
 
 				args := &networkArgs{
-					header:         c.Int("header"),
-					fee:            c.Uint64("fee"),
+					header:         c.Int("Header"),
+					fee:            c.Uint64("Fee"),
 					rootWalletFile: c.String("rootwallet"),
 					optionId:       option.id,
 					payload:        c.Uint64(option.name),
-					txcount:        c.Int("txcount"),
+					txcount:        c.Int("TxCount"),
 				}
 
 				err := configureNetwork(args, logger)
@@ -70,17 +70,17 @@ func GetNetworkCommand(logger *log.Logger) cli.Command {
 		},
 		Flags: []cli.Flag{
 			cli.IntFlag{
-				Name:  "header",
-				Usage: "header flag",
+				Name:  "Header",
+				Usage: "Header flag",
 				Value: 0,
 			},
 			cli.Uint64Flag{
-				Name:  "fee",
-				Usage: "specify the fee",
+				Name:  "Fee",
+				Usage: "specify the Fee",
 				Value: 1,
 			},
 			cli.IntFlag{
-				Name:  "txcount",
+				Name:  "TxCount",
 				Usage: "the sender's current transaction counter",
 			},
 			cli.StringFlag{
@@ -137,7 +137,7 @@ func configureNetwork(args *networkArgs, logger *log.Logger) error {
 
 func (args networkArgs) ValidateInput() error {
 	if args.fee <= 0 {
-		return errors.New("invalid argument: fee must be > 0")
+		return errors.New("invalid argument: Fee must be > 0")
 	}
 
 	if args.txcount < 0 {

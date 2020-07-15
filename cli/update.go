@@ -27,29 +27,29 @@ type updateTxArgs struct {
 func GetUpdateTxCommand(logger *log.Logger) cli.Command {
 	return cli.Command{
 		Name:  "update",
-		Usage: "update the data field of a specific transaction",
+		Usage: "update the Data field of a specific transaction",
 		Action: func(c *cli.Context) error {
 			args := &updateTxArgs{
-				header:             c.Int("header"),
-				fee:                c.Uint64("fee"),
+				header:             c.Int("Header"),
+				fee:                c.Uint64("Fee"),
 				txToUpdate:         c.String("tx-hash"),
 				txIssuerWalletFile: c.String("tx-issuer"),
 				chParamsFile:       c.String("chparams"),
-				updateData:         c.String("update-data"),
-				data:               c.String("data"),
+				updateData:         c.String("update-Data"),
+				data:               c.String("Data"),
 			}
 
 			return updateTx(args, logger)
 		},
 		Flags: []cli.Flag{
 			cli.IntFlag{
-				Name:  "header",
-				Usage: "header flag",
+				Name:  "Header",
+				Usage: "Header flag",
 				Value: 0,
 			},
 			cli.Uint64Flag{
-				Name:  "fee",
-				Usage: "specify the fee",
+				Name:  "Fee",
+				Usage: "specify the Fee",
 				Value: 1,
 			},
 			cli.StringFlag{
@@ -65,12 +65,12 @@ func GetUpdateTxCommand(logger *log.Logger) cli.Command {
 				Usage: "load the chameleon hash parameters from `FILE`",
 			},
 			cli.StringFlag{
-				Name:  "update-data",
-				Usage: "specify the new data that shall be updated on the tx",
+				Name:  "update-Data",
+				Usage: "specify the new Data that shall be updated on the tx",
 			},
 			cli.StringFlag{
-				Name:  "data",
-				Usage: "specify the data on this tx.",
+				Name:  "Data",
+				Usage: "specify the Data on this tx.",
 			},
 		},
 	}
@@ -174,10 +174,10 @@ func generateCollisionCheckString(
 	oldSHA3 := txToUpdate.SHA3()
 	oldHashInput := oldSHA3[:]
 
-	// Now it's time to mutate the tx data.
+	// Now it's time to mutate the tx Data.
 	txToUpdate.SetData(newData)
 
-	// Then we compute the new SHA3 hash. This hash incorporates the changes in the data field.
+	// Then we compute the new SHA3 hash. This hash incorporates the changes in the Data field.
 	// With the new hash input we compute a hash collision and get the new check string.
 	newSHA3 := txToUpdate.SHA3()
 	newHashInput := newSHA3[:]

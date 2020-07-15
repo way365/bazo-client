@@ -22,14 +22,14 @@ type stakingArgs struct {
 
 func GetStakingCommand(logger *log.Logger) cli.Command {
 	headerFlag := cli.IntFlag{
-		Name:  "header",
-		Usage: "header flag",
+		Name:  "Header",
+		Usage: "Header flag",
 		Value: 0,
 	}
 
 	feeFlag := cli.Uint64Flag{
-		Name:  "fee",
-		Usage: "specify the fee",
+		Name:  "Fee",
+		Usage: "specify the Fee",
 		Value: 1,
 	}
 
@@ -82,8 +82,8 @@ func GetStakingCommand(logger *log.Logger) cli.Command {
 
 func parseStakingArgs(c *cli.Context) *stakingArgs {
 	return &stakingArgs{
-		header:     c.Int("header"),
-		fee:        c.Uint64("fee"),
+		header:     c.Int("Header"),
+		fee:        c.Uint64("Fee"),
 		walletFile: c.String("wallet"),
 		commitment: c.String("commitment"),
 	}
@@ -140,7 +140,7 @@ func toggleStaking(args *stakingArgs, logger *log.Logger) error {
 
 func (args stakingArgs) ValidateInput() error {
 	if args.fee <= 0 {
-		return errors.New("invalid argument: fee must be > 0")
+		return errors.New("invalid argument: Fee must be > 0")
 	}
 
 	if len(args.walletFile) == 0 {

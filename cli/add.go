@@ -23,8 +23,8 @@ func getAddAccountCommand(logger *log.Logger) cli.Command {
 		Usage: "add an existing account",
 		Action: func(c *cli.Context) error {
 			args := &addAccountArgs{
-				header:             c.Int("header"),
-				fee:                c.Uint64("fee"),
+				header:             c.Int("Header"),
+				fee:                c.Uint64("Fee"),
 				rootWalletFile:     c.String("rootwallet"),
 				address:            c.String("address"),
 				chamHashParamsFile: c.String("chamHashParams"),
@@ -90,7 +90,7 @@ func addAccount(args *addAccountArgs, logger *log.Logger) error {
 
 func (args addAccountArgs) ValidateInput() error {
 	if args.fee <= 0 {
-		return errors.New("invalid argument: fee must be > 0")
+		return errors.New("invalid argument: Fee must be > 0")
 	}
 
 	if len(args.rootWalletFile) == 0 {

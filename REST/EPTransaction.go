@@ -117,10 +117,8 @@ func CreateFundsTxEndpoint(w http.ResponseWriter, req *http.Request) {
 	logger.Println("Incoming createFunds request")
 
 	params := mux.Vars(req)
-
 	var fromPub [64]byte
 	var toPub [64]byte
-
 	header, _ := strconv.Atoi(params["header"])
 	amount, _ := strconv.Atoi(params["amount"])
 	fee, _ := strconv.Atoi(params["fee"])
@@ -128,7 +126,6 @@ func CreateFundsTxEndpoint(w http.ResponseWriter, req *http.Request) {
 
 	fromPubInt, _ := new(big.Int).SetString(params["fromPub"], 16)
 	copy(fromPub[:], fromPubInt.Bytes())
-
 	toPubInt, _ := new(big.Int).SetString(params["toPub"], 16)
 	copy(toPub[:], toPubInt.Bytes())
 

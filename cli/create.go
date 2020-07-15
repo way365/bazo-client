@@ -26,12 +26,12 @@ func getCreateAccountCommand(logger *log.Logger) cli.Command {
 		Usage: "create a new account and add it to the network",
 		Action: func(c *cli.Context) error {
 			args := &createAccountArgs{
-				header:         c.Int("header"),
-				fee:            c.Uint64("fee"),
+				header:         c.Int("Header"),
+				fee:            c.Uint64("Fee"),
 				rootWalletFile: c.String("rootwallet"),
 				walletFile:     c.String("wallet"),
 				chParamsFile:   c.String("chparams"),
-				data:           c.String("data"),
+				data:           c.String("Data"),
 			}
 
 			return createAccount(args, logger)
@@ -49,8 +49,8 @@ func getCreateAccountCommand(logger *log.Logger) cli.Command {
 				Usage: "save new chameleon hash parameters to `FILE`",
 			},
 			cli.StringFlag{
-				Name:  "data",
-				Usage: "data field to add a message to the tx",
+				Name:  "Data",
+				Usage: "Data field to add a message to the tx",
 			},
 		},
 	}
@@ -117,7 +117,7 @@ func createAccount(args *createAccountArgs, logger *log.Logger) error {
 
 func (args createAccountArgs) ValidateInput() error {
 	if args.fee <= 0 {
-		return errors.New("invalid argument: fee must be > 0")
+		return errors.New("invalid argument: Fee must be > 0")
 	}
 
 	if len(args.rootWalletFile) == 0 {

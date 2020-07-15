@@ -13,14 +13,14 @@ import (
 
 var (
 	headerFlag = cli.IntFlag{
-		Name:  "header",
-		Usage: "header flag",
+		Name:  "Header",
+		Usage: "Header flag",
 		Value: 0,
 	}
 
 	feeFlag = cli.Uint64Flag{
-		Name:  "fee",
-		Usage: "specify the fee",
+		Name:  "Fee",
+		Usage: "specify the Fee",
 		Value: 1,
 	}
 
