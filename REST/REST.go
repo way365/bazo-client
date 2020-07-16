@@ -20,7 +20,12 @@ func Init() {
 
 	router := mux.NewRouter()
 	getEndpoints(router)
-	log.Fatal(http.ListenAndServe(":"+util.Config.Thisclient.Port, handlers.CORS()(router)))
+	//headersOk := handlers.AllowedHeaders([]string{"X-Requested-With"})
+	//originsOk := handlers.AllowedOrigins([]string{"*"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	ignoreOptions := handlers.IgnoreOptions()
+
+	log.Fatal(http.ListenAndServe(":"+util.Config.Thisclient.Port, handlers.CORS(methodsOk, ignoreOptions)(router)))
 }
 
 func getEndpoints(router *mux.Router) {
@@ -37,6 +42,7 @@ func getEndpoints(router *mux.Router) {
 	//router.HandleFunc("/sendFundsTx/{txHash}/{txSign}", SendFundsTxEndpoint).Methods("POST")
 
 	router.HandleFunc("/createFundsTx", CreateFundsTx).Methods("POST")
+
 	router.HandleFunc("/signFundsTx", SignFundsTx).Methods("POST")
 
 }
@@ -49,5 +55,6 @@ func SendJsonResponse(w http.ResponseWriter, resp interface{}) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Write(js)
 }

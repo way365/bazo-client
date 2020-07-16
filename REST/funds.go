@@ -13,11 +13,13 @@ import (
 )
 
 type SignatureResponseBody struct {
-	TxHash    string `json:"hash"`
-	Signature string `json:"signature"`
+	TxHash string `json:"hash"`
+	R      string `json:"r"`
+	S      string `json:"s"`
 }
 
 func CreateFundsTx(w http.ResponseWriter, req *http.Request) {
+
 	logger.Println("Incoming createFunds request")
 	decoder := json.NewDecoder(req.Body)
 	var fundsArgs args.FundsArgs
@@ -56,26 +58,32 @@ func SignFundsTx(w http.ResponseWriter, req *http.Request) {
 	}
 
 	var txHash [32]byte
-	var Sig [64]byte
+	var R, S [32]byte
+	var Signature [64]byte
 	txHashBytes, err := hex.DecodeString(requestBody.TxHash)
 	if err != nil {
 		panic(err)
 	}
 
-	signatureBytes, err := hex.DecodeString(requestBody.Signature)
+	rBytes, err := hex.DecodeString(requestBody.R)
+	sBytes, err := hex.DecodeString(requestBody.S)
+	//signatureBytes, err := hex.DecodeString(requestBody.Signature)
 	if err != nil {
 		panic(err)
 	}
 
 	copy(txHash[:], txHashBytes)
-	copy(Sig[:], signatureBytes)
+	copy(R[:], rBytes)
+	copy(S[:], sBytes)
+	copy(Signature[:], R[:32])
+	copy(Signature[:], S[:32])
 
 	tx := cstorage.ReadTransaction(txHash)
 	if tx == nil {
 		panic(errors.New("transaction not found"))
 	}
 
-	tx.SetSignature(Sig)
+	tx.SetSignature(Signature)
 	cstorage.WriteTransaction(txHash, tx)
 
 	switch tx.(type) {
