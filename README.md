@@ -75,6 +75,7 @@ Options
 * `--fee`: (default: 1) Set transaction fee
 * `--rootwallet`: Load root's private key from this file
 * `--file`: Save the new account's public and private key to this file
+* `--data`: (optional) Data (string) to be stored on this transaction.
 
 Examples
 
@@ -117,8 +118,8 @@ Options
 * `--amount`: The amount to transfer from sender to recipient
 * `--from`: The file to load the sender's private key from
 * `--to`: The file to load the recipient's public key from
-* `--toAddress`: Instead of passing the recipient's address by file with `--to`, you can also directly pass the recipient's address with this option
 * `--multisig`: (optional) The file to load the multisig's private key from.
+* `--data`: (optional) Data (string) to be stored on this transaction.
 
 Examples
 
