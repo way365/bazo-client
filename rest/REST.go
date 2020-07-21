@@ -1,4 +1,4 @@
-package REST
+package rest
 
 import (
 	"encoding/json"
@@ -16,7 +16,7 @@ var (
 func Init() {
 	logger = util.InitLogger()
 
-	logger.Printf("%v\n\n", "Starting REST...")
+	logger.Printf("%v\n\n", "Starting rest...")
 
 	router := mux.NewRouter()
 	getEndpoints(router)
