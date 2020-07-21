@@ -13,13 +13,11 @@ import (
 )
 
 type SignatureResponseBody struct {
-	TxHash string `json:"hash"`
-	R      string `json:"r"`
-	S      string `json:"s"`
+	TxHash    string `json:"hash"`
+	Signature string `json:"signature"`
 }
 
 func CreateFundsTx(w http.ResponseWriter, req *http.Request) {
-
 	logger.Println("Incoming createFunds request")
 	decoder := json.NewDecoder(req.Body)
 	var fundsArgs args.FundsArgs
@@ -33,7 +31,7 @@ func CreateFundsTx(w http.ResponseWriter, req *http.Request) {
 		fundsArgs.Fee = 1
 	}
 
-	txHash, err := client.PrepareFundsTx(&fundsArgs, logger)
+	txHash, _, err := client.PrepareFundsTx(&fundsArgs, logger)
 	if err != nil {
 		panic(err)
 	}
@@ -58,25 +56,16 @@ func SignFundsTx(w http.ResponseWriter, req *http.Request) {
 	}
 
 	var txHash [32]byte
-	var R, S [32]byte
 	var Signature [64]byte
+
+	signatureBytes, err := hex.DecodeString(requestBody.Signature)
 	txHashBytes, err := hex.DecodeString(requestBody.TxHash)
 	if err != nil {
 		panic(err)
 	}
 
-	rBytes, err := hex.DecodeString(requestBody.R)
-	sBytes, err := hex.DecodeString(requestBody.S)
-	//signatureBytes, err := hex.DecodeString(requestBody.Signature)
-	if err != nil {
-		panic(err)
-	}
-
-	copy(txHash[:], txHashBytes)
-	copy(R[:], rBytes)
-	copy(S[:], sBytes)
-	copy(Signature[:], R[:32])
-	copy(Signature[:], S[:32])
+	copy(txHash[:], txHashBytes[:])
+	copy(Signature[:], signatureBytes[:])
 
 	tx := cstorage.ReadTransaction(txHash)
 	if tx == nil {
@@ -84,14 +73,15 @@ func SignFundsTx(w http.ResponseWriter, req *http.Request) {
 	}
 
 	tx.SetSignature(Signature)
-	cstorage.WriteTransaction(txHash, tx)
 
 	switch tx.(type) {
 	case *protocol.FundsTx:
-		client.SubmitFundsTx(tx.(*protocol.FundsTx))
+		client.SubmitFundsTx(txHash, tx.(*protocol.FundsTx))
 	default:
 		panic(errors.New("can't cast transaction to funds transaction"))
 	}
+
+	cstorage.WriteTransaction(txHash, tx)
 
 	var responseBody []Content
 	var txResponse Content
