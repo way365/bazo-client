@@ -1,22 +1,23 @@
 package args
 
-import "errors"
+import (
+	"errors"
+)
 
 type FundsArgs struct {
-	Header         int    `json:"header"`
-	FromWalletFile string `json:"from"`
-	ToWalletFile   string `json:"to"`
-	ToAddress      string
-	MultisigFile   string `json:"multisig"`
-	ChParamsFile   string `json:"chparams"`
-	Amount         uint64 `json:"amount"`
-	Fee            uint64 `json:"fee"`
-	TxCount        int    `json:"txcount"`
-	Data           string `json:"data"`
+	Header      int    `json:"header"`
+	From        string `json:"from"`
+	To          string `json:"to"`
+	MultiSigKey string `json:"multisig"`
+	ChParams    string `json:"chparams"`
+	Amount      uint64 `json:"amount"`
+	Fee         uint64 `json:"fee"`
+	TxCount     int    `json:"txcount"`
+	Data        string `json:"data"`
 }
 
 func (args FundsArgs) ValidateInput() error {
-	if len(args.FromWalletFile) == 0 {
+	if len(args.From) == 0 {
 		return errors.New("argument missing: from")
 	}
 
@@ -24,12 +25,8 @@ func (args FundsArgs) ValidateInput() error {
 		return errors.New("invalid argument: txcnt must be >= 0")
 	}
 
-	if len(args.ToWalletFile) == 0 && len(args.ToAddress) == 0 {
-		return errors.New("argument missing: to or toAddess")
-	}
-
-	if len(args.ToWalletFile) == 0 && len(args.ToAddress) != 128 {
-		return errors.New("invalid argument: ToAddress")
+	if len(args.To) == 0 {
+		return errors.New("argument missing: to")
 	}
 
 	if args.Fee <= 0 {

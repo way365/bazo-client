@@ -13,16 +13,15 @@ func GetFundsCommand(logger *log.Logger) cli.Command {
 		Usage: "send funds from one account to another",
 		Action: func(c *cli.Context) error {
 			args := &args.FundsArgs{
-				Header:         c.Int("header"),
-				FromWalletFile: c.String("from"),
-				ToWalletFile:   c.String("to"),
-				ToAddress:      c.String("toAddress"),
-				MultisigFile:   c.String("multisig"),
-				ChParamsFile:   c.String("chparams"),
-				Amount:         c.Uint64("amount"),
-				Fee:            c.Uint64("fee"),
-				TxCount:        c.Int("txcount"),
-				Data:           c.String("data"),
+				Header:      c.Int("header"),
+				From:        c.String("from"),
+				To:          c.String("to"),
+				MultiSigKey: c.String("multisig"),
+				ChParams:    c.String("chparams"),
+				Amount:      c.Uint64("amount"),
+				Fee:         c.Uint64("fee"),
+				TxCount:     c.Int("txcount"),
+				Data:        c.String("data"),
 			}
 
 			err := args.ValidateInput()
@@ -30,7 +29,7 @@ func GetFundsCommand(logger *log.Logger) cli.Command {
 				return err
 			}
 
-			_, err = client.CreateSignSubmitFundsTx(args, logger)
+			_, err = client.PrepareSignSubmitFundsTx(args, logger)
 
 			return err
 		},
@@ -42,15 +41,11 @@ func GetFundsCommand(logger *log.Logger) cli.Command {
 			},
 			cli.StringFlag{
 				Name:  "from",
-				Usage: "load the sender's private key from `FILE`",
+				Usage: "load the sender's private key from `FILE` or provide the private key directly",
 			},
 			cli.StringFlag{
 				Name:  "to",
-				Usage: "load the recipient's public key from `FILE`",
-			},
-			cli.StringFlag{
-				Name:  "ToAddress",
-				Usage: "the recipient's 128 byze public address",
+				Usage: "load the recipient's public key from `FILE` or provide the public key directly",
 			},
 			cli.Uint64Flag{
 				Name:  "amount",
@@ -71,11 +66,12 @@ func GetFundsCommand(logger *log.Logger) cli.Command {
 			},
 			cli.StringFlag{
 				Name:  "chparams",
-				Usage: "load the chameleon hash parameters from `FILE`",
+				Usage: "load the chameleon hash parameters from `FILE` or provide them directly",
 			},
 			cli.StringFlag{
 				Name:  "data",
 				Usage: "Data field to add a message to the tx",
+				Value: "",
 			},
 		},
 	}
