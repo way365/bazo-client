@@ -8,33 +8,33 @@ import (
 	"net/http"
 )
 
-func CreateFundsTx(w http.ResponseWriter, req *http.Request) {
-	logger.Println("Incoming createFunds request")
+func CreateAccountTx(w http.ResponseWriter, req *http.Request) {
+	logger.Println("Incoming create account request")
 	decoder := json.NewDecoder(req.Body)
-	var fundsArgs args.FundsArgs
+	var createAccountArgs args.CreateAccountArgs
 
-	err := decoder.Decode(&fundsArgs)
+	err := decoder.Decode(&createAccountArgs)
 	if err != nil {
 		panic(err)
 	}
 
-	err = fundsArgs.ValidateInput()
+	err = createAccountArgs.ValidateInput()
 	if err != nil {
 		fmt.Printf("%v", err)
 		SendJsonResponse(w, JsonResponse{http.StatusInternalServerError, "Invalid arguments", []Content{}})
 		return
 	}
 
-	txHash, _, err := client.PrepareFundsTx(&fundsArgs, logger)
+	txHash, _, err := client.PrepareCreateAccountTx(&createAccountArgs, logger)
 	if err != nil {
 		panic(err)
 	}
 
 	var responseBody []Content
 	var txResponse Content
-	txResponse.Name = "FundsTx"
+	txResponse.Name = "CreateAccountTx"
 	txResponse.Detail = fmt.Sprintf("%x", txHash)
 	responseBody = append(responseBody, txResponse)
 
-	SendJsonResponse(w, JsonResponse{http.StatusOK, "FundsTx successfully created. Sign the provided hash.", responseBody})
+	SendJsonResponse(w, JsonResponse{http.StatusOK, "AccountTx successfully created. Sign the provided hash.", responseBody})
 }

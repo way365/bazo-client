@@ -17,7 +17,7 @@ func ResolvePublicKey(publicKeyOrFilename string) (publicKey *ecdsa.PublicKey, e
 
 	// Public key provided indirectly by a filename.
 	if len(publicKeyOrFilename) > 0 && strings.Contains(publicKeyOrFilename, ".txt") {
-		publicKey, err = crypto.ExtractECDSAPublicKeyFromFile(publicKeyOrFilename)
+		publicKey, err = crypto.GetOrCreateECDSAPublicKeyFromFile(publicKeyOrFilename)
 		if err != nil {
 			return publicKey, nil
 		}

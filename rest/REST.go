@@ -13,6 +13,11 @@ var (
 	logger *log.Logger
 )
 
+type SignatureResponseBody struct {
+	TxHash    string `json:"hash"`
+	Signature string `json:"signature"`
+}
+
 func Init() {
 	logger = util.InitLogger()
 
@@ -20,8 +25,6 @@ func Init() {
 
 	router := mux.NewRouter()
 	getEndpoints(router)
-	//headersOk := handlers.AllowedHeaders([]string{"X-Requested-With"})
-	//originsOk := handlers.AllowedOrigins([]string{"*"})
 	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 	ignoreOptions := handlers.IgnoreOptions()
 
@@ -29,21 +32,20 @@ func Init() {
 }
 
 func getEndpoints(router *mux.Router) {
-	router.HandleFunc("/account/{id}", GetAccountEndpoint).Methods("GET")
+	//router.HandleFunc("/account/{id}", GetAccountEndpoint).Methods("GET")
+	//
+	//router.HandleFunc("/createAccTx/{header}/{fee}/{issuer}", CreateAccTxEndpoint).Methods("POST")
+	//router.HandleFunc("/createAccTx/{pubKey}/{header}/{fee}/{issuer}", CreateAccTxEndpointWithPubKey).Methods("POST")
+	//router.HandleFunc("/sendAccTx/{txHash}/{txSign}", SendAccTxEndpoint).Methods("POST")
+	//
+	//router.HandleFunc("/createConfigTx/{header}/{id}/{payload}/{fee}/{txCnt}", CreateConfigTxEndpoint).Methods("POST")
+	//router.HandleFunc("/sendConfigTx/{txHash}/{txSign}", SendConfigTxEndpoint).Methods("POST")
 
-	router.HandleFunc("/createAccTx/{header}/{fee}/{issuer}", CreateAccTxEndpoint).Methods("POST")
-	router.HandleFunc("/createAccTx/{pubKey}/{header}/{fee}/{issuer}", CreateAccTxEndpointWithPubKey).Methods("POST")
-	router.HandleFunc("/sendAccTx/{txHash}/{txSign}", SendAccTxEndpoint).Methods("POST")
+	router.HandleFunc("/tx/acc", CreateAccountTx).Methods("POST")
+	router.HandleFunc("/tx/funds", CreateFundsTx).Methods("POST")
+	router.HandleFunc("/tx/update", CreateFundsTx).Methods("POST")
 
-	router.HandleFunc("/createConfigTx/{header}/{id}/{payload}/{fee}/{txCnt}", CreateConfigTxEndpoint).Methods("POST")
-	router.HandleFunc("/sendConfigTx/{txHash}/{txSign}", SendConfigTxEndpoint).Methods("POST")
-
-	//router.HandleFunc("/createFundsTx/{header}/{amount}/{fee}/{txCnt}/{fromPub}/{toPub}", CreateFundsTxEndpoint).Methods("POST")
-	//router.HandleFunc("/sendFundsTx/{txHash}/{txSign}", SendFundsTxEndpoint).Methods("POST")
-
-	router.HandleFunc("/createFundsTx", CreateFundsTx).Methods("POST")
-
-	router.HandleFunc("/signFundsTx", SignFundsTx).Methods("POST")
+	router.HandleFunc("/tx/signature", SignTx).Methods("POST")
 
 }
 

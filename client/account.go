@@ -2,20 +2,18 @@ package client
 
 import (
 	"crypto/ecdsa"
+	"crypto/rand"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/julwil/bazo-client/args"
 	"github.com/julwil/bazo-client/cstorage"
 	"github.com/julwil/bazo-client/network"
-	"github.com/julwil/bazo-client/util"
 	"github.com/julwil/bazo-miner/crypto"
 	"github.com/julwil/bazo-miner/miner"
-	"github.com/julwil/bazo-miner/p2p"
 	"github.com/julwil/bazo-miner/protocol"
 	"log"
 	"math/big"
-	"os"
 )
 
 type Account struct {
@@ -28,64 +26,105 @@ type Account struct {
 	IsStaking     bool     `json:"isStaking"`
 }
 
-func PrepareSignSubmitCreateAccTx(args *args.CreateAccountArgs, logger *log.Logger) error {
-	err := args.ValidateInput()
+func PrepareSignSubmitCreateAccTx(arguments *args.CreateAccountArgs, logger *log.Logger) (txHash [32]byte, err error) {
+	txHash, tx, err := PrepareCreateAccountTx(arguments, logger)
 	if err != nil {
-		return err
+		return [32]byte{}, err
 	}
 
-	rootPrivKey, err := crypto.ExtractECDSAKeyFromFile(args.RootWallet)
+	issuerPrivKey, err := args.ResolvePrivateKey(arguments.RootWallet)
 	if err != nil {
-		return err
+		return [32]byte{}, err
 	}
 
-	// Private Key
-	var newPrivKey *ecdsa.PrivateKey
+	if err := SignAccountTx(txHash, tx, issuerPrivKey); err != nil {
+		logger.Printf("%v\n", err)
+		return [32]byte{}, err
+	}
 
-	chParams, err := crypto.GetOrCreateChParamsFromFile(args.ChParams)
+	if err := SubmitTx(txHash, tx); err != nil {
+		logger.Printf("%v\n", err)
+		return [32]byte{}, err
+	}
+
+	cstorage.WriteTransaction(txHash, tx)
+
+	return txHash, nil
+}
+
+func PrepareCreateAccountTx(arguments *args.CreateAccountArgs, logger *log.Logger) (txHash [32]byte, tx *protocol.AccTx, err error) {
+	err = arguments.ValidateInput()
 	if err != nil {
-		return err
+		return [32]byte{}, tx, err
+	}
+
+	newPubKey, err := crypto.GetOrCreateECDSAPublicKeyFromFile(arguments.Wallet)
+	if err != nil {
+		return [32]byte{}, tx, err
+
+	}
+
+	newChParams, err := crypto.GetOrCreateChParamsFromFile(arguments.ChParams)
+	if err != nil {
+		return [32]byte{}, tx, err
 	}
 
 	// IMPORTANT: We need to sanitize the secret trapdoor key before we send it to the network.
-	chParams.TK = []byte{}
+	newChParams.TK = []byte{}
 
-	chCheckString := crypto.NewChCheckString(chParams)
+	chCheckString := crypto.NewChCheckString(newChParams)
 
-	tx, newPrivKey, err := protocol.ConstrAccTx(
-		byte(args.Header),
-		uint64(args.Fee),
-		[64]byte{},
-		rootPrivKey,
+	issuerPubKey, err := args.ResolvePublicKey(arguments.RootWallet)
+	if err != nil {
+		return [32]byte{}, tx, err
+	}
+
+	tx, err = protocol.ConstrAccTx(
+		byte(arguments.Header),
+		uint64(arguments.Fee),
+		protocol.SerializeHashContent(crypto.GetAddressFromPubKey(issuerPubKey)),
+		crypto.GetAddressFromPubKey(newPubKey),
 		nil,
 		nil,
-		chParams,
+		newChParams,
 		chCheckString,
-		[]byte(args.Data),
+		[]byte(arguments.Data),
 	)
 	if err != nil {
-		return err
+		return [32]byte{}, tx, err
 	}
 
-	//accAddress := protocol.SerializeHashContent(tx.PubKey)
-	//crypto.ChamHashParamsMap[accAddress] = chParams
+	txHash = tx.ChameleonHash(newChParams)
+	cstorage.WriteTransaction(txHash, tx)
 
-	//Write the private key to the given textfile
-	file, err := os.Create(args.Wallet)
-	if err != nil {
-		return err
-	}
-
-	_, err = file.WriteString(string(newPrivKey.X.Text(16)) + "\n")
-	_, err = file.WriteString(string(newPrivKey.Y.Text(16)) + "\n")
-	_, err = file.WriteString(string(newPrivKey.D.Text(16)) + "\n")
-
-	if err != nil {
-		return errors.New(fmt.Sprintf("failed to write key to file %v", args.Wallet))
-	}
-
-	return SendAccountTx(tx, chParams, logger)
+	return txHash, tx, err
 }
+
+func SignAccountTx(txHash [32]byte, tx *protocol.AccTx, privKey *ecdsa.PrivateKey) error {
+	var signature [64]byte
+	r, s, err := ecdsa.Sign(rand.Reader, privKey, txHash[:])
+	if err != nil {
+		return err
+	}
+
+	copy(signature[:32], r.Bytes())
+	copy(signature[32:], s.Bytes())
+	tx.SetSignature(signature)
+
+	return nil
+}
+
+//func SubmitAccountTx(txHash [32]byte, tx protocol.Transaction) error {
+//
+//	if err := network.SendTx(util.Config.BootstrapIpport, tx, p2p.ACCTX_BRDCST); err != nil {
+//		logger.Printf("%v\n", err)
+//		return err
+//	} else {
+//		logger.Printf("Transaction successfully sent to network:\nTxHash: %x%v", txHash, tx)
+//	}
+//
+//	return nil
+//}
 
 func GetAccount(address [64]byte) (*Account, []*FundsTxJson, error) {
 	//Initialize new account with empty address
@@ -133,46 +172,32 @@ func GetAccount(address [64]byte) (*Account, []*FundsTxJson, error) {
 	return &account, lastTenTx, nil
 }
 
-func SendAccountTx(tx protocol.Transaction, chParams *crypto.ChameleonHashParameters, logger *log.Logger) error {
-
-	if err := network.SendTx(util.Config.BootstrapIpport, tx, p2p.ACCTX_BRDCST); err != nil {
-		logger.Printf("%v\n", err)
-		return err
-	} else {
-		logger.Printf("Transaction successfully sent to network:\nTxHash: %x%v", tx.ChameleonHash(chParams), tx)
-		cstorage.WriteTransaction(tx.ChameleonHash(chParams), tx)
-	}
-
-	return nil
-}
-
-func AddAccount(args *args.AddAccountArgs, logger *log.Logger) error {
-	err := args.ValidateInput()
+func AddAccount(arguments *args.AddAccountArgs, logger *log.Logger) error {
+	err := arguments.ValidateInput()
 	if err != nil {
 		return err
 	}
 
-	rootPrivKey, err := crypto.ExtractECDSAKeyFromFile(args.RootWallet)
+	rootPrivKey, err := args.ResolvePrivateKey(arguments.RootWallet)
 	if err != nil {
 		return err
 	}
 
-	chParams, err := crypto.GetOrCreateChParamsFromFile(args.ChParams)
+	chParams, err := args.ResolveChParams(arguments.ChParams)
 	if err != nil {
 		return err
 	}
 
 	chCheckString := crypto.NewChCheckString(chParams)
 
-	var newAddress [64]byte
-	newPubInt, _ := new(big.Int).SetString(args.Address, 16)
-	copy(newAddress[:], newPubInt.Bytes())
+	var addressBytes [64]byte
+	copy(addressBytes[:], arguments.Address)
 
-	tx, _, err := protocol.ConstrAccTx(
-		byte(args.Header),
-		uint64(args.Fee),
-		newAddress,
-		rootPrivKey,
+	tx, err := protocol.ConstrAccTx(
+		byte(arguments.Header),
+		uint64(arguments.Fee),
+		protocol.SerializeHashContent(crypto.GetAddressFromPubKey(&rootPrivKey.PublicKey)),
+		addressBytes,
 		nil,
 		nil,
 		chParams,
@@ -183,12 +208,9 @@ func AddAccount(args *args.AddAccountArgs, logger *log.Logger) error {
 		return err
 	}
 
-	return SendAccountTx(tx, chParams, logger)
-}
+	txHash := tx.ChameleonHash(chParams)
 
-func (acc Account) String() string {
-	addressHash := protocol.SerializeHashContent(acc.Address)
-	return fmt.Sprintf("Hash: %x, Address: %x, TxCnt: %v, Balance: %v, isCreated: %v, isRoot: %v", addressHash[:8], acc.Address[:8], acc.TxCnt, acc.Balance, acc.IsCreated, acc.IsRoot)
+	return SubmitTx(txHash, tx)
 }
 
 func CheckAccount(args *args.CheckAccountArgs, logger *log.Logger) error {
@@ -223,4 +245,9 @@ func CheckAccount(args *args.CheckAccountArgs, logger *log.Logger) error {
 	}
 
 	return nil
+}
+
+func (acc Account) String() string {
+	addressHash := protocol.SerializeHashContent(acc.Address)
+	return fmt.Sprintf("Hash: %x, Address: %x, TxCnt: %v, Balance: %v, isCreated: %v, isRoot: %v", addressHash[:8], acc.Address[:8], acc.TxCnt, acc.Balance, acc.IsCreated, acc.IsRoot)
 }

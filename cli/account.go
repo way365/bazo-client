@@ -78,7 +78,9 @@ func getCreateAccountCommand(logger *log.Logger) cli.Command {
 				Data:       c.String("data"),
 			}
 
-			return client.PrepareSignSubmitCreateAccTx(args, logger)
+			_, err := client.PrepareSignSubmitCreateAccTx(args, logger)
+
+			return err
 		},
 		Flags: []cli.Flag{
 			headerFlag,

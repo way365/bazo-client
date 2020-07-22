@@ -5,10 +5,7 @@ import (
 	"crypto/rand"
 	"github.com/julwil/bazo-client/args"
 	"github.com/julwil/bazo-client/cstorage"
-	"github.com/julwil/bazo-client/network"
-	"github.com/julwil/bazo-client/util"
 	"github.com/julwil/bazo-miner/crypto"
-	"github.com/julwil/bazo-miner/p2p"
 	"github.com/julwil/bazo-miner/protocol"
 	"log"
 )
@@ -31,17 +28,12 @@ func PrepareSignSubmitFundsTx(arguments *args.FundsArgs, logger *log.Logger) (tx
 		return [32]byte{}, err
 	}
 
-	chParams, err := args.ResolveChParams(arguments.ChParams)
-	if err != nil {
-		return [32]byte{}, err
-	}
-
-	if err := SignFundsTx(tx, fromPrivKey, multiSigPrivKey, chParams); err != nil {
+	if err := SignFundsTx(txHash, tx, fromPrivKey, multiSigPrivKey); err != nil {
 		logger.Printf("%v\n", err)
 		return [32]byte{}, err
 	}
 
-	if err := SubmitFundsTx(txHash, tx); err != nil {
+	if err := SubmitTx(txHash, tx); err != nil {
 		logger.Printf("%v\n", err)
 		return [32]byte{}, err
 	}
@@ -99,14 +91,7 @@ func PrepareFundsTx(arguments *args.FundsArgs, logger *log.Logger) (txHash [32]b
 	return txHash, tx, err
 }
 
-func SignFundsTx(
-	tx *protocol.FundsTx,
-	privKey *ecdsa.PrivateKey,
-	multiSigKey *ecdsa.PrivateKey,
-	chParams *crypto.ChameleonHashParameters,
-) error {
-	txHash := tx.ChameleonHash(chParams)
-
+func SignFundsTx(txHash [32]byte, tx *protocol.FundsTx, privKey *ecdsa.PrivateKey, multiSigKey *ecdsa.PrivateKey) error {
 	r, s, err := ecdsa.Sign(rand.Reader, privKey, txHash[:])
 	if err != nil {
 		return err
@@ -128,11 +113,11 @@ func SignFundsTx(
 	return nil
 }
 
-func SubmitFundsTx(txHash [32]byte, tx *protocol.FundsTx) error {
-	err := network.SendTx(util.Config.BootstrapIpport, tx, p2p.FUNDSTX_BRDCST)
-	if err == nil {
-		logger.Printf("Transaction successfully sent to network:\nTxHash: %x%v", txHash, tx)
-	}
-
-	return err
-}
+//func SubmitFundsTx(txHash [32]byte, tx protocol.Transaction) error {
+//	err := network.SendTx(util.Config.BootstrapIpport, tx, p2p.FUNDSTX_BRDCST)
+//	if err == nil {
+//		logger.Printf("Transaction successfully sent to network:\nTxHash: %x%v", txHash, tx)
+//	}
+//
+//	return err
+//}
