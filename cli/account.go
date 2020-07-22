@@ -1,25 +1,21 @@
 package cli
 
 import (
-	"github.com/julwil/bazo-client/cstorage"
-	"github.com/julwil/bazo-client/network"
-	"github.com/julwil/bazo-client/util"
-	"github.com/julwil/bazo-miner/crypto"
-	"github.com/julwil/bazo-miner/p2p"
-	"github.com/julwil/bazo-miner/protocol"
+	"github.com/julwil/bazo-client/args"
+	"github.com/julwil/bazo-client/client"
 	"github.com/urfave/cli"
 	"log"
 )
 
 var (
 	headerFlag = cli.IntFlag{
-		Name:  "Header",
+		Name:  "header",
 		Usage: "Header flag",
 		Value: 0,
 	}
 
 	feeFlag = cli.Uint64Flag{
-		Name:  "Fee",
+		Name:  "fee",
 		Usage: "specify the Fee",
 		Value: 1,
 	}
@@ -42,15 +38,96 @@ func GetAccountCommand(logger *log.Logger) cli.Command {
 	}
 }
 
-func sendAccountTx(tx protocol.Transaction, chamHashParams *crypto.ChameleonHashParameters, logger *log.Logger) error {
+func getCheckAccountCommand(logger *log.Logger) cli.Command {
+	return cli.Command{
+		Name:  "check",
+		Usage: "check account state",
+		Action: func(c *cli.Context) error {
+			args := &args.CheckAccountArgs{
+				Address: c.String("address"),
+				Wallet:  c.String("wallet"),
+			}
 
-	if err := network.SendTx(util.Config.BootstrapIpport, tx, p2p.ACCTX_BRDCST); err != nil {
-		logger.Printf("%v\n", err)
-		return err
-	} else {
-		logger.Printf("Transaction successfully sent to network:\nTxHash: %x%v", tx.ChameleonHash(chamHashParams), tx)
-		cstorage.WriteTransaction(tx.ChameleonHash(chamHashParams), tx)
+			return client.CheckAccount(args, logger)
+		},
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  "address",
+				Usage: "the account's 128 byte Address",
+			},
+			cli.StringFlag{
+				Name:  "wallet",
+				Usage: "load the account's 128 byte Address from `FILE`",
+				Value: "wallet.txt",
+			},
+		},
 	}
+}
 
-	return nil
+func getCreateAccountCommand(logger *log.Logger) cli.Command {
+	return cli.Command{
+		Name:  "create",
+		Usage: "create a new account and add it to the network",
+		Action: func(c *cli.Context) error {
+			args := &args.CreateAccountArgs{
+				Header:     c.Int("header"),
+				Fee:        c.Uint64("fee"),
+				RootWallet: c.String("rootwallet"),
+				Wallet:     c.String("wallet"),
+				ChParams:   c.String("chparams"),
+				Data:       c.String("data"),
+			}
+
+			return client.PrepareSignSubmitCreateAccTx(args, logger)
+		},
+		Flags: []cli.Flag{
+			headerFlag,
+			feeFlag,
+			rootkeyFlag,
+			cli.StringFlag{
+				Name:  "wallet",
+				Usage: "save new account's public private key to `FILE`",
+			},
+			cli.StringFlag{
+				Name:  "chparams",
+				Usage: "save new chameleon hash parameters to `FILE`",
+			},
+			cli.StringFlag{
+				Name:  "data",
+				Usage: "Data field to add a message to the tx",
+				Value: "",
+			},
+		},
+	}
+}
+
+func getAddAccountCommand(logger *log.Logger) cli.Command {
+	return cli.Command{
+		Name:  "add",
+		Usage: "add an existing account",
+		Action: func(c *cli.Context) error {
+			args := &args.AddAccountArgs{
+				Header:     c.Int("header"),
+				Fee:        c.Uint64("fee"),
+				RootWallet: c.String("rootwallet"),
+				Address:    c.String("address"),
+				ChParams:   c.String("chparams"),
+			}
+
+			return client.AddAccount(args, logger)
+		},
+		Flags: []cli.Flag{
+			headerFlag,
+			feeFlag,
+			rootkeyFlag,
+			cli.StringFlag{
+				Name:  "address",
+				Usage: "the account's Address",
+			},
+			cli.StringFlag{
+				Name:  "chparams",
+				Usage: "save new chameleon hash parameters to `FILE`",
+			},
+		},
+	}
 }
