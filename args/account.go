@@ -5,9 +5,9 @@ import "errors"
 type CreateAccountArgs struct {
 	Header     int    `json:"header"`
 	Fee        uint64 `json:"fee"`
-	RootWallet string `json:"rootwallet"`
+	RootWallet string `json:"root_wallet"`
 	Wallet     string `json:"wallet"`
-	ChParams   string `json:"chparams"`
+	ChParams   string `json:"ch_params"`
 	Data       string `json:"data"`
 }
 
@@ -16,7 +16,7 @@ type AddAccountArgs struct {
 	Fee        uint64 `json:"fee"`
 	RootWallet string `json:"root_wallet"`
 	Address    string `json:"address"`
-	ChParams   string `json:"chparams"`
+	ChParams   string `json:"ch_params"`
 }
 
 type CheckAccountArgs struct {

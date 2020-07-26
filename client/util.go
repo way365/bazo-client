@@ -1,6 +1,8 @@
 package client
 
 import (
+	"crypto/ecdsa"
+	"crypto/rand"
 	"github.com/julwil/bazo-client/network"
 	"github.com/julwil/bazo-client/util"
 	"github.com/julwil/bazo-miner/p2p"
@@ -22,6 +24,20 @@ func put(slice []*FundsTxJson, tx *FundsTxJson) {
 	}
 
 	slice[9] = tx
+}
+
+func SignTx(txHash [32]byte, tx protocol.Transaction, privKey *ecdsa.PrivateKey) error {
+	var signature [64]byte
+	r, s, err := ecdsa.Sign(rand.Reader, privKey, txHash[:])
+	if err != nil {
+		return err
+	}
+
+	copy(signature[:32], r.Bytes())
+	copy(signature[32:], s.Bytes())
+	tx.SetSignature(signature)
+
+	return nil
 }
 
 func SubmitTx(txHash [32]byte, tx protocol.Transaction) error {

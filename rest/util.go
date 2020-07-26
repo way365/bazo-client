@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-func SignTx(w http.ResponseWriter, req *http.Request) {
+func PostSignTx(w http.ResponseWriter, req *http.Request) {
 	logger.Println("Incoming sign tx request")
 	decoder := json.NewDecoder(req.Body)
 	var requestBody SignatureResponseBody

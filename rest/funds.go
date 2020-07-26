@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func CreateFundsTx(w http.ResponseWriter, req *http.Request) {
+func PostFundsTx(w http.ResponseWriter, req *http.Request) {
 	logger.Println("Incoming createFunds request")
 	decoder := json.NewDecoder(req.Body)
 	var fundsArgs args.FundsArgs

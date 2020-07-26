@@ -1,16 +1,10 @@
 package client
 
 import (
-	"crypto/ecdsa"
-	"crypto/rand"
-	"encoding/hex"
-	"errors"
-	"fmt"
 	"github.com/julwil/bazo-client/args"
 	"github.com/julwil/bazo-client/cstorage"
 	"github.com/julwil/bazo-client/network"
 	"github.com/julwil/bazo-miner/crypto"
-	"github.com/julwil/bazo-miner/miner"
 	"github.com/julwil/bazo-miner/protocol"
 	"log"
 	"math/big"
@@ -37,7 +31,7 @@ func PrepareSignSubmitCreateAccTx(arguments *args.CreateAccountArgs, logger *log
 		return [32]byte{}, err
 	}
 
-	if err := SignAccountTx(txHash, tx, issuerPrivKey); err != nil {
+	if err := SignTx(txHash, tx, issuerPrivKey); err != nil {
 		logger.Printf("%v\n", err)
 		return [32]byte{}, err
 	}
@@ -100,76 +94,24 @@ func PrepareCreateAccountTx(arguments *args.CreateAccountArgs, logger *log.Logge
 	return txHash, tx, err
 }
 
-func SignAccountTx(txHash [32]byte, tx *protocol.AccTx, privKey *ecdsa.PrivateKey) error {
-	var signature [64]byte
-	r, s, err := ecdsa.Sign(rand.Reader, privKey, txHash[:])
+func GetAccount(address [64]byte) (account *protocol.Account, err error) {
+
+	err = network.AccReq(false, protocol.SerializeHashContent(address))
 	if err != nil {
-		return err
+		return account, err
 	}
 
-	copy(signature[:32], r.Bytes())
-	copy(signature[32:], s.Bytes())
-	tx.SetSignature(signature)
-
-	return nil
-}
-
-//func SubmitAccountTx(txHash [32]byte, tx protocol.Transaction) error {
-//
-//	if err := network.SendTx(util.Config.BootstrapIpport, tx, p2p.ACCTX_BRDCST); err != nil {
-//		logger.Printf("%v\n", err)
-//		return err
-//	} else {
-//		logger.Printf("Transaction successfully sent to network:\nTxHash: %x%v", txHash, tx)
-//	}
-//
-//	return nil
-//}
-
-func GetAccount(address [64]byte) (*Account, []*FundsTxJson, error) {
-	//Initialize new account with empty address
-	account := Account{address, hex.EncodeToString(address[:]), 0, 0, false, false, false}
-
-	//Set default params
-	activeParameters = miner.NewDefaultParameters()
-
-	network.AccReq(false, protocol.SerializeHashContent(account.Address))
-	if accI, _ := network.Fetch(network.AccChan); accI != nil {
-		if acc := accI.(*protocol.Account); acc != nil {
-			account.IsCreated = true
-			account.IsStaking = acc.IsStaking
-
-			//If Acc is Root in the bazo network state, we do not check for accTx, else we check
-			network.AccReq(true, protocol.SerializeHashContent(account.Address))
-			if rootAccI, _ := network.Fetch(network.AccChan); rootAccI != nil {
-				if rootAcc := rootAccI.(*protocol.Account); rootAcc != nil {
-					account.IsRoot = true
-				}
-			}
-		}
-	}
-
-	if account.IsCreated == false {
-		return nil, nil, errors.New(fmt.Sprintf("Account %x does not exist.\n", account.Address[:8]))
-	}
-
-	//if account.IsStaking == true {
-	//	return nil, nil, errors.New(fmt.Sprintf("Account %x is a validator account. Validator's state cannot be calculated at the moment. We are sorry.\n", account.Address[:8]))
-	//}
-
-	var lastTenTx = make([]*FundsTxJson, 10)
-	err := getState(&account, lastTenTx)
+	payload, err := network.Fetch(network.AccChan)
 	if err != nil {
-		return nil, nil, errors.New(fmt.Sprintf("Could not calculate state of account %x: %v\n", account.Address[:8], err))
+		return account, err
 	}
 
-	//No accTx exists for this account since it is the initial root account
-	//Add the initial root's balance
-	//if account.IsCreated == false && account.IsRoot == true {
-	//	account.IsCreated = true
-	//}
+	account = payload.(*protocol.Account)
+	if account.Address == [64]byte{} {
+		return account, err
+	}
 
-	return &account, lastTenTx, nil
+	return account, nil
 }
 
 func AddAccount(arguments *args.AddAccountArgs, logger *log.Logger) error {
@@ -236,7 +178,7 @@ func CheckAccount(args *args.CheckAccountArgs, logger *log.Logger) error {
 	logger.Printf("My Address: %x\n", address)
 
 	loadBlockHeaders()
-	acc, _, err := GetAccount(address)
+	acc, err := GetAccount(address)
 	if err != nil {
 		logger.Println(err)
 		return err
@@ -245,9 +187,4 @@ func CheckAccount(args *args.CheckAccountArgs, logger *log.Logger) error {
 	}
 
 	return nil
-}
-
-func (acc Account) String() string {
-	addressHash := protocol.SerializeHashContent(acc.Address)
-	return fmt.Sprintf("Hash: %x, Address: %x, TxCnt: %v, Balance: %v, isCreated: %v, isRoot: %v", addressHash[:8], acc.Address[:8], acc.TxCnt, acc.Balance, acc.IsCreated, acc.IsRoot)
 }

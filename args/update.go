@@ -3,13 +3,13 @@ package args
 import "errors"
 
 type UpdateTxArgs struct {
-	Header         int
-	Fee            uint64
-	TxToUpdate     string
-	TxIssuerWallet string
-	ChParams       string
-	UpdateData     string // Data to be updated on the TxToUpdate.
-	Data           string // Data on this tx.
+	Header     int    `json:"header"`
+	Fee        uint64 `json:"fee"`
+	TxToUpdate string `json:"tx_to_update"`
+	TxIssuer   string `json:"tx_issuer"`
+	ChParams   string `json:"ch_params"`
+	UpdateData string `json:"update_data"`
+	Data       string `json:"data"`
 }
 
 func (args UpdateTxArgs) ValidateInput() error {
@@ -17,7 +17,7 @@ func (args UpdateTxArgs) ValidateInput() error {
 		return errors.New("argument missing: txHash")
 	}
 
-	if len(args.TxIssuerWallet) == 0 {
+	if len(args.TxIssuer) == 0 {
 		return errors.New("argument missing: txIssuer")
 	}
 

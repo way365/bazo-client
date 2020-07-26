@@ -32,6 +32,7 @@ func Init() {
 }
 
 func getEndpoints(router *mux.Router) {
+	// Old code. Needs to be updated.
 	//router.HandleFunc("/account/{id}", GetAccountEndpoint).Methods("GET")
 	//
 	//router.HandleFunc("/createAccTx/{header}/{fee}/{issuer}", CreateAccTxEndpoint).Methods("POST")
@@ -41,11 +42,10 @@ func getEndpoints(router *mux.Router) {
 	//router.HandleFunc("/createConfigTx/{header}/{id}/{payload}/{fee}/{txCnt}", CreateConfigTxEndpoint).Methods("POST")
 	//router.HandleFunc("/sendConfigTx/{txHash}/{txSign}", SendConfigTxEndpoint).Methods("POST")
 
-	router.HandleFunc("/tx/acc", CreateAccountTx).Methods("POST")
-	router.HandleFunc("/tx/funds", CreateFundsTx).Methods("POST")
-	router.HandleFunc("/tx/update", CreateFundsTx).Methods("POST")
-
-	router.HandleFunc("/tx/signature", SignTx).Methods("POST")
+	router.HandleFunc("/tx/acc", PostAccountTx).Methods("POST")
+	router.HandleFunc("/tx/funds", PostFundsTx).Methods("POST")
+	router.HandleFunc("/tx/update", PostUpdateTx).Methods("POST")
+	router.HandleFunc("/tx/signature", PostSignTx).Methods("POST")
 
 }
 

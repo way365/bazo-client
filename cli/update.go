@@ -13,16 +13,22 @@ func GetUpdateTxCommand(logger *log.Logger) cli.Command {
 		Usage: "update the data field of a specific transaction",
 		Action: func(c *cli.Context) error {
 			args := &args.UpdateTxArgs{
-				Header:         c.Int("header"),
-				Fee:            c.Uint64("fee"),
-				TxToUpdate:     c.String("tx-hash"),
-				TxIssuerWallet: c.String("tx-issuer"),
-				ChParams:       c.String("chparams"),
-				UpdateData:     c.String("update-data"),
-				Data:           c.String("data"),
+				Header:     c.Int("header"),
+				Fee:        c.Uint64("fee"),
+				TxToUpdate: c.String("tx-hash"),
+				TxIssuer:   c.String("tx-issuer"),
+				ChParams:   c.String("chparams"),
+				UpdateData: c.String("update-data"),
+				Data:       c.String("data"),
 			}
 
-			return client.PrepareSignSubmitUpdateTx(args, logger)
+			err := args.ValidateInput()
+			if err != nil {
+				return err
+			}
+
+			_, err = client.PrepareSignSubmitUpdateTx(args, logger)
+			return err
 		},
 		Flags: []cli.Flag{
 			cli.IntFlag{
