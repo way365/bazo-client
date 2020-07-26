@@ -15,4 +15,4 @@ require (
 	golang.org/x/sys v0.0.0-20200302150141-5c8b2ff67527 // indirect
 )
 
-replace github.com/julwil/bazo-miner => ../bazo-miner
+replace github.com/julwil/bazo-miner => ../bazo-miner // Packages from bazo-miner are resolved locally, rather than with the specified version.
