@@ -2,7 +2,7 @@ package cli
 
 import (
 	"github.com/julwil/bazo-client/args"
-	"github.com/julwil/bazo-client/client"
+	"github.com/julwil/bazo-client/services"
 	"github.com/urfave/cli"
 	"log"
 )
@@ -29,7 +29,7 @@ func GetFundsCommand(logger *log.Logger) cli.Command {
 				return err
 			}
 
-			_, err = client.PrepareSignSubmitFundsTx(args, logger)
+			_, err = services.PrepareSignSubmitFundsTx(args, logger)
 
 			return err
 		},

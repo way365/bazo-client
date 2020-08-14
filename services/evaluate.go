@@ -1,4 +1,4 @@
-package client
+package services
 
 import (
 	"github.com/julwil/bazo-client/network"

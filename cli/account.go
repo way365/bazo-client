@@ -2,7 +2,7 @@ package cli
 
 import (
 	"github.com/julwil/bazo-client/args"
-	"github.com/julwil/bazo-client/client"
+	"github.com/julwil/bazo-client/services"
 	"github.com/urfave/cli"
 	"log"
 )
@@ -48,7 +48,7 @@ func getCheckAccountCommand(logger *log.Logger) cli.Command {
 				Wallet:  c.String("wallet"),
 			}
 
-			return client.CheckAccount(args, logger)
+			return services.CheckAccount(args, logger)
 		},
 		Flags: []cli.Flag{
 			cli.StringFlag{
@@ -78,7 +78,7 @@ func getCreateAccountCommand(logger *log.Logger) cli.Command {
 				Data:       c.String("data"),
 			}
 
-			_, err := client.PrepareSignSubmitCreateAccTx(args, logger)
+			_, err := services.PrepareSignSubmitCreateAccTx(args, logger)
 
 			return err
 		},
@@ -116,7 +116,7 @@ func getAddAccountCommand(logger *log.Logger) cli.Command {
 				ChParams:   c.String("chparams"),
 			}
 
-			return client.AddAccount(args, logger)
+			return services.AddAccount(args, logger)
 		},
 		Flags: []cli.Flag{
 			headerFlag,

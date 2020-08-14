@@ -1,10 +1,10 @@
-package rest
+package http
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/julwil/bazo-client/args"
-	"github.com/julwil/bazo-client/client"
+	"github.com/julwil/bazo-client/services"
 	"net/http"
 )
 
@@ -25,7 +25,7 @@ func PostFundsTx(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	txHash, _, err := client.PrepareFundsTx(&fundsArgs, logger)
+	txHash, _, err := services.PrepareFundsTx(&fundsArgs, logger)
 	if err != nil {
 		panic(err)
 	}

@@ -1,8 +1,8 @@
 package cli
 
 import (
-	"github.com/julwil/bazo-client/client"
-	"github.com/julwil/bazo-client/rest"
+	"github.com/julwil/bazo-client/http"
+	"github.com/julwil/bazo-client/services"
 	"github.com/urfave/cli"
 )
 
@@ -11,8 +11,8 @@ func GetRestCommand() cli.Command {
 		Name:  "rest",
 		Usage: "start the rest service",
 		Action: func(c *cli.Context) error {
-			client.Sync()
-			rest.Init()
+			services.Sync()
+			http.Init()
 			return nil
 		},
 	}

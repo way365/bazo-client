@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/julwil/bazo-client/cli"
-	"github.com/julwil/bazo-client/client"
 	"github.com/julwil/bazo-client/cstorage"
 	"github.com/julwil/bazo-client/network"
+	"github.com/julwil/bazo-client/services"
 	"github.com/julwil/bazo-client/util"
 	"github.com/julwil/bazo-miner/p2p"
 	cli2 "github.com/urfave/cli"
@@ -13,7 +13,7 @@ import (
 
 func main() {
 	p2p.InitLogging()
-	client.InitLogging()
+	services.InitLogging()
 	logger := util.InitLogger()
 	util.Config = util.LoadConfiguration()
 

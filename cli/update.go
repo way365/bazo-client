@@ -2,7 +2,7 @@ package cli
 
 import (
 	"github.com/julwil/bazo-client/args"
-	"github.com/julwil/bazo-client/client"
+	"github.com/julwil/bazo-client/services"
 	"github.com/urfave/cli"
 	"log"
 )
@@ -27,7 +27,7 @@ func GetUpdateTxCommand(logger *log.Logger) cli.Command {
 				return err
 			}
 
-			_, err = client.PrepareSignSubmitUpdateTx(args, logger)
+			_, err = services.PrepareSignSubmitUpdateTx(args, logger)
 			return err
 		},
 		Flags: []cli.Flag{

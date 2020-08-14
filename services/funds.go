@@ -1,4 +1,4 @@
-package client
+package services
 
 import (
 	"crypto/ecdsa"
@@ -112,12 +112,3 @@ func SignFundsTx(txHash [32]byte, tx *protocol.FundsTx, privKey *ecdsa.PrivateKe
 
 	return nil
 }
-
-//func SubmitFundsTx(txHash [32]byte, tx protocol.Transaction) error {
-//	err := network.SendTx(util.Config.BootstrapIpport, tx, p2p.FUNDSTX_BRDCST)
-//	if err == nil {
-//		logger.Printf("Transaction successfully sent to network:\nTxHash: %x%v", txHash, tx)
-//	}
-//
-//	return err
-//}

@@ -1,9 +1,9 @@
-package rest
+package http
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/julwil/bazo-client/client"
 	"github.com/julwil/bazo-client/network"
+	"github.com/julwil/bazo-client/services"
 	"github.com/julwil/bazo-miner/protocol"
 	"math/big"
 	"net/http"
@@ -34,7 +34,7 @@ func GetAccountEndpoint(w http.ResponseWriter, req *http.Request) {
 		addressHash = protocol.SerializeHashContent(address)
 	}
 
-	acc, err := client.GetAccount(address)
+	acc, err := services.GetAccount(address)
 	if err != nil {
 		SendJsonResponse(w, JsonResponse{http.StatusInternalServerError, err.Error(), nil})
 	} else {

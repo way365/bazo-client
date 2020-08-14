@@ -3,7 +3,7 @@ package cli
 import (
 	"errors"
 	"github.com/julwil/bazo-client/args"
-	"github.com/julwil/bazo-client/client"
+	"github.com/julwil/bazo-client/services"
 	"github.com/urfave/cli"
 	"log"
 )
@@ -38,7 +38,7 @@ func GetNetworkCommand(logger *log.Logger) cli.Command {
 					TxCount:    c.Int("TxCount"),
 				}
 
-				err := client.ConfigureNetwork(args, logger)
+				err := services.ConfigureNetwork(args, logger)
 				if err != nil {
 					return err
 				}

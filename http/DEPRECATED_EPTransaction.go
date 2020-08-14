@@ -1,4 +1,4 @@
-package rest
+package http
 
 import (
 	"crypto/ecdsa"
@@ -7,8 +7,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/julwil/bazo-client/client"
 	"github.com/julwil/bazo-client/network"
+	"github.com/julwil/bazo-client/services"
 	"github.com/julwil/bazo-client/util"
 	"github.com/julwil/bazo-miner/p2p"
 	"github.com/julwil/bazo-miner/protocol"
@@ -49,7 +49,7 @@ func CreateAccTxEndpoint(w http.ResponseWriter, req *http.Request) {
 	copy(tx.PubKey[32:], newAccAddress.PublicKey.Y.Bytes())
 
 	txHash := tx.Hash()
-	client.UnsignedAccTx[txHash] = &tx
+	services.UnsignedAccTx[txHash] = &tx
 
 	var content []Content
 	content = append(content, Content{"PubKey1", hex.EncodeToString(tx.PubKey[:32])})
@@ -79,7 +79,7 @@ func CreateAccTxEndpointWithPubKey(w http.ResponseWriter, req *http.Request) {
 	copy(tx.Issuer[:], issuerInt.Bytes())
 
 	txHash := tx.Hash()
-	client.UnsignedAccTx[txHash] = &tx
+	services.UnsignedAccTx[txHash] = &tx
 
 	var content []Content
 	content = append(content, Content{"TxHash", hex.EncodeToString(txHash[:])})
@@ -106,7 +106,7 @@ func CreateConfigTxEndpoint(w http.ResponseWriter, req *http.Request) {
 	}
 
 	txHash := tx.Hash()
-	client.UnsignedConfigTx[txHash] = &tx
+	services.UnsignedConfigTx[txHash] = &tx
 
 	var content []Content
 	content = append(content, Content{"TxHash", hex.EncodeToString(txHash[:])})
@@ -139,7 +139,7 @@ func CreateFundsTxEndpoint(w http.ResponseWriter, req *http.Request) {
 	}
 
 	txHash := tx.Hash()
-	client.UnsignedFundsTx[txHash] = &tx
+	services.UnsignedFundsTx[txHash] = &tx
 	logger.Printf("New unsigned tx: %x\n", txHash)
 
 	var content []Content
@@ -163,39 +163,39 @@ func sendTxEndpoint(w http.ResponseWriter, req *http.Request, txType int) {
 
 	switch txType {
 	case p2p.ACCTX_BRDCST:
-		if tx := client.UnsignedAccTx[txHash]; tx != nil {
+		if tx := services.UnsignedAccTx[txHash]; tx != nil {
 			tx.Sig = txSign
 			err = network.SendTx(util.Config.BootstrapIpport, tx, p2p.ACCTX_BRDCST)
 
 			//If tx was successful or not, delete it from map either way. A new tx creation is the only option to repeat.
-			delete(client.UnsignedFundsTx, txHash)
+			delete(services.UnsignedFundsTx, txHash)
 		} else {
 			SendJsonResponse(w, JsonResponse{http.StatusInternalServerError, fmt.Sprintf("No transaction with hash %x found to sign", txHash), nil})
 			return
 		}
 	case p2p.CONFIGTX_BRDCST:
-		if tx := client.UnsignedConfigTx[txHash]; tx != nil {
+		if tx := services.UnsignedConfigTx[txHash]; tx != nil {
 			tx.Sig = txSign
 			err = network.SendTx(util.Config.BootstrapIpport, tx, p2p.CONFIGTX_BRDCST)
 
 			//If tx was successful or not, delete it from map either way. A new tx creation is the only option to repeat.
-			delete(client.UnsignedFundsTx, txHash)
+			delete(services.UnsignedFundsTx, txHash)
 		} else {
 			SendJsonResponse(w, JsonResponse{http.StatusInternalServerError, fmt.Sprintf("No transaction with hash %x found to sign", txHash), nil})
 			return
 		}
 	case p2p.FUNDSTX_BRDCST:
-		if tx := client.UnsignedFundsTx[txHash]; tx != nil {
+		if tx := services.UnsignedFundsTx[txHash]; tx != nil {
 			if tx.Sig1 == [64]byte{} {
 				tx.Sig1 = txSign
 				err = network.SendTx(util.Config.MultisigIpport, tx, p2p.FUNDSTX_BRDCST)
 				if err != nil {
-					delete(client.UnsignedFundsTx, txHash)
+					delete(services.UnsignedFundsTx, txHash)
 				}
 			} else {
 				tx.Sig2 = txSign
 				err = network.SendTx(util.Config.BootstrapIpport, tx, p2p.FUNDSTX_BRDCST)
-				delete(client.UnsignedFundsTx, txHash)
+				delete(services.UnsignedFundsTx, txHash)
 			}
 		} else {
 			logger.Printf("No transaction with hash %x found to sign\n", txHash)

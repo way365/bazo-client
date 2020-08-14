@@ -2,7 +2,7 @@ package cli
 
 import (
 	"github.com/julwil/bazo-client/args"
-	"github.com/julwil/bazo-client/client"
+	"github.com/julwil/bazo-client/services"
 	"github.com/urfave/cli"
 	"log"
 )
@@ -36,7 +36,7 @@ func GetStakingCommand(logger *log.Logger) cli.Command {
 				Action: func(c *cli.Context) error {
 					args := args.ParseStakingArgs(c)
 					args.StakingValue = true
-					return client.ToggleStaking(args, logger)
+					return services.ToggleStaking(args, logger)
 				},
 				Flags: []cli.Flag{
 					headerFlag,
@@ -55,7 +55,7 @@ func GetStakingCommand(logger *log.Logger) cli.Command {
 				Action: func(c *cli.Context) error {
 					args := args.ParseStakingArgs(c)
 					args.StakingValue = false
-					return client.ToggleStaking(args, logger)
+					return services.ToggleStaking(args, logger)
 				},
 				Flags: []cli.Flag{
 					headerFlag,

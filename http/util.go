@@ -1,12 +1,12 @@
-package rest
+package http
 
 import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/julwil/bazo-client/client"
 	"github.com/julwil/bazo-client/cstorage"
+	"github.com/julwil/bazo-client/services"
 	"net/http"
 )
 
@@ -39,7 +39,7 @@ func PostSignTx(w http.ResponseWriter, req *http.Request) {
 
 	tx.SetSignature(Signature)
 
-	client.SubmitTx(txHash, tx)
+	services.SubmitTx(txHash, tx)
 
 	cstorage.WriteTransaction(txHash, tx)
 
