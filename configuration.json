@@ -1,10 +1,10 @@
 {
   "this_client": {
-    "ip": "127.0.0.1",
+    "ip": "bazo-client",
     "port": "8010"
   },
   "bootstrap_server": {
-    "ip": "127.0.0.1",
+    "ip": "bazo-miner",
     "port": "8000"
   },
   "multisig_server": {
