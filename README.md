@@ -5,7 +5,7 @@ The command line interface for interacting with the Bazo blockchain implemented 
 ## Setup Instructions
 1. Install Go (developed and tested with version >= 1.14)
 2. Set $GOROOT and $GOPATH. For more information, please check out the [official documentation](https://github.com/golang/go/wiki/SettingGOPATH).
-3. run `./scripts/build_project.sh`
+3. run `./scripts/fix-imports.sh`
 
 Furthermore, the `configuration.json` in the root directory of the bazo-client must be properly configured before 
 interacting with the CLI.
@@ -127,6 +127,27 @@ Examples
 bazo-client funds --from myaccount.txt --to recipient.txt --txcount 0 --amount 100
 bazo-client funds --from myaccount.txt --to recipient.txt --txcount 1 --amount 100 --multisig myaccount.txt
 bazo-client funds --from myaccount.txt --toAddress b978...<120 byte omitted>...e86ba --txcount 2 --amount 100 --fee 15
+```
+
+### Update
+A client can update the content of the data field of specific transactions. 
+He does so by purposely generating a hash collision between the hash with the old and new data. 
+
+The following transactions can be updated:
+* Account-Tx
+* Funds-Tx
+* Update-Tx
+
+Arguments
+* `--tx-hash` Hash of the transaction to be updated
+* `--tx-issuer` Wallet file of the client. Ensures clients are only allowed to update their own transactions.
+* `--update-data` Data that shall be updated on the tx
+* `--chparams` Chameleon hash parameters of the client
+
+Example
+
+```
+./bazo-client update --tx-hash d07a963769a3a23eec6c25cc81612cf3269399cb2db84e38040951131c7e6200 --tx-issuer WalletA.txt --update-data "New data goes here." --chparams ChParamsA.txt
 ```
 
 ### Network
