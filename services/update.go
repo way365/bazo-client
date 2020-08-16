@@ -72,7 +72,6 @@ func PrepareUpdateTx(arguments *args.UpdateTxArgs, logger *log.Logger) (txHash [
 
 	// Finally, we create the update-tx.
 	tx, err = protocol.ConstrUpdateTx(
-		byte(arguments.Header),
 		uint64(arguments.Fee),
 		txToUpdateHash,
 		newChCheckString,

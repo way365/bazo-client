@@ -3,7 +3,6 @@ package args
 import "errors"
 
 type UpdateTxArgs struct {
-	Header     int    `json:"header"`
 	Fee        uint64 `json:"fee"`
 	TxToUpdate string `json:"tx_to_update"`
 	TxIssuer   string `json:"tx_issuer"`

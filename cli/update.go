@@ -13,7 +13,6 @@ func GetUpdateTxCommand(logger *log.Logger) cli.Command {
 		Usage: "update the data field of a specific transaction",
 		Action: func(c *cli.Context) error {
 			args := &args.UpdateTxArgs{
-				Header:     c.Int("header"),
 				Fee:        c.Uint64("fee"),
 				TxToUpdate: c.String("tx-hash"),
 				TxIssuer:   c.String("tx-issuer"),
@@ -31,11 +30,6 @@ func GetUpdateTxCommand(logger *log.Logger) cli.Command {
 			return err
 		},
 		Flags: []cli.Flag{
-			cli.IntFlag{
-				Name:  "header",
-				Usage: "Header flag",
-				Value: 0,
-			},
 			cli.Uint64Flag{
 				Name:  "fee",
 				Usage: "specify the Fee",
