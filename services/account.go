@@ -58,15 +58,15 @@ func PrepareCreateAccountTx(arguments *args.CreateAccountArgs, logger *log.Logge
 
 	}
 
-	newChParams, err := crypto.GetOrCreateChParamsFromFile(arguments.ChParams)
+	parameters, err := crypto.GetOrCreateParametersFromFile(arguments.Parameters)
 	if err != nil {
 		return [32]byte{}, tx, err
 	}
 
 	// IMPORTANT: We need to sanitize the secret trapdoor key before we send it to the network.
-	newChParams.TK = []byte{}
+	parameters.TK = []byte{}
 
-	chCheckString := crypto.NewChCheckString(newChParams)
+	checkString := crypto.NewCheckString(parameters)
 
 	issuerPubKey, err := args.ResolvePublicKey(arguments.RootWallet)
 	if err != nil {
@@ -80,15 +80,15 @@ func PrepareCreateAccountTx(arguments *args.CreateAccountArgs, logger *log.Logge
 		crypto.GetAddressFromPubKey(newPubKey),
 		nil,
 		nil,
-		newChParams,
-		chCheckString,
+		parameters,
+		checkString,
 		[]byte(arguments.Data),
 	)
 	if err != nil {
 		return [32]byte{}, tx, err
 	}
 
-	txHash = tx.ChameleonHash(newChParams)
+	txHash = tx.ChameleonHash(parameters)
 	cstorage.WriteTransaction(txHash, tx)
 
 	return txHash, tx, err
@@ -125,12 +125,12 @@ func AddAccount(arguments *args.AddAccountArgs, logger *log.Logger) error {
 		return err
 	}
 
-	chParams, err := args.ResolveChParams(arguments.ChParams)
+	parameters, err := args.ResolveParameters(arguments.Parameters)
 	if err != nil {
 		return err
 	}
 
-	chCheckString := crypto.NewChCheckString(chParams)
+	checkString := crypto.NewCheckString(parameters)
 
 	var addressBytes [64]byte
 	copy(addressBytes[:], arguments.Address)
@@ -142,15 +142,15 @@ func AddAccount(arguments *args.AddAccountArgs, logger *log.Logger) error {
 		addressBytes,
 		nil,
 		nil,
-		chParams,
-		chCheckString,
+		parameters,
+		checkString,
 		[]byte{},
 	)
 	if err != nil {
 		return err
 	}
 
-	txHash := tx.ChameleonHash(chParams)
+	txHash := tx.ChameleonHash(parameters)
 
 	return SubmitTx(txHash, tx)
 }

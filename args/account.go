@@ -7,7 +7,7 @@ type CreateAccountArgs struct {
 	Fee        uint64 `json:"fee"`
 	RootWallet string `json:"root_wallet"`
 	Wallet     string `json:"wallet"`
-	ChParams   string `json:"ch_params"`
+	Parameters string `json:"ch_params"`
 	Data       string `json:"data"`
 }
 
@@ -16,7 +16,7 @@ type AddAccountArgs struct {
 	Fee        uint64 `json:"fee"`
 	RootWallet string `json:"root_wallet"`
 	Address    string `json:"address"`
-	ChParams   string `json:"ch_params"`
+	Parameters string `json:"ch_params"`
 }
 
 type CheckAccountArgs struct {
@@ -37,7 +37,7 @@ func (args CreateAccountArgs) ValidateInput() error {
 		return errors.New("argument missing: wallet")
 	}
 
-	if len(args.ChParams) == 0 {
+	if len(args.Parameters) == 0 {
 		return errors.New("argument missing: chparams")
 	}
 
@@ -61,7 +61,7 @@ func (args AddAccountArgs) ValidateInput() error {
 		return errors.New("invalid argument length: Address")
 	}
 
-	if len(args.ChParams) == 0 {
+	if len(args.Parameters) == 0 {
 		return errors.New("argument missing: chparams")
 	}
 

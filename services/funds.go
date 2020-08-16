@@ -62,12 +62,12 @@ func PrepareFundsTx(arguments *args.FundsArgs, logger *log.Logger) (txHash [32]b
 	fromAddress := crypto.GetAddressFromPubKey(fromPubKey)
 	toAddress := crypto.GetAddressFromPubKey(toPubKey)
 
-	chParams, err := args.ResolveChParams(arguments.ChParams)
+	parameters, err := args.ResolveParameters(arguments.Parameters)
 	if err != nil {
 		return [32]byte{}, tx, err
 	}
 
-	chCheckString := crypto.NewChCheckString(chParams)
+	checkString := crypto.NewCheckString(parameters)
 
 	tx, err = protocol.ConstrFundsTx(
 		byte(arguments.Header),
@@ -76,7 +76,7 @@ func PrepareFundsTx(arguments *args.FundsArgs, logger *log.Logger) (txHash [32]b
 		uint32(arguments.TxCount),
 		protocol.SerializeHashContent(fromAddress),
 		protocol.SerializeHashContent(toAddress),
-		chCheckString,
+		checkString,
 		[]byte(arguments.Data),
 	)
 
@@ -85,7 +85,7 @@ func PrepareFundsTx(arguments *args.FundsArgs, logger *log.Logger) (txHash [32]b
 		return [32]byte{}, tx, err
 	}
 
-	txHash = tx.ChameleonHash(chParams)
+	txHash = tx.ChameleonHash(parameters)
 	cstorage.WriteTransaction(txHash, tx)
 
 	return txHash, tx, err

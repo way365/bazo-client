@@ -16,7 +16,7 @@ func GetUpdateTxCommand(logger *log.Logger) cli.Command {
 				Fee:        c.Uint64("fee"),
 				TxToUpdate: c.String("tx-hash"),
 				TxIssuer:   c.String("tx-issuer"),
-				ChParams:   c.String("chparams"),
+				Parameters: c.String("chparams"),
 				UpdateData: c.String("update-data"),
 				Data:       c.String("data"),
 			}

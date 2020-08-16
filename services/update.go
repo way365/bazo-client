@@ -60,24 +60,24 @@ func PrepareUpdateTx(arguments *args.UpdateTxArgs, logger *log.Logger) (txHash [
 		copy(txToUpdateHash[:], newPubInt.Bytes())
 	}
 
-	chParams, err := args.ResolveChParams(arguments.ChParams)
-	chCheckString := crypto.NewChCheckString(chParams)
+	parameters, err := args.ResolveParameters(arguments.Parameters)
+	checkString := crypto.NewCheckString(parameters)
 	if err != nil {
 		return [32]byte{}, tx, errors.New("no chameleon hash parameter files found with given parameters")
 	}
 
 	newData := []byte(arguments.UpdateData)
 	// We create a new check string for TxToDelete to create a hash collision using chameleon hashing.
-	newChCheckString := generateCollisionCheckString(txToUpdateHash, chParams, newData)
+	newCheckString := generateCollisionCheckString(txToUpdateHash, parameters, newData)
 
 	// Finally, we create the update-tx.
 	tx, err = protocol.ConstrUpdateTx(
 		uint64(arguments.Fee),
 		txToUpdateHash,
-		newChCheckString,
+		newCheckString,
 		newData,
 		protocol.SerializeHashContent(issuerAddress),
-		chCheckString,
+		checkString,
 		[]byte(arguments.Data),
 	)
 
@@ -86,7 +86,7 @@ func PrepareUpdateTx(arguments *args.UpdateTxArgs, logger *log.Logger) (txHash [
 		return [32]byte{}, tx, err
 	}
 
-	txHash = tx.ChameleonHash(chParams)
+	txHash = tx.ChameleonHash(parameters)
 	cstorage.WriteTransaction(txHash, tx)
 
 	return txHash, tx, err
@@ -94,9 +94,9 @@ func PrepareUpdateTx(arguments *args.UpdateTxArgs, logger *log.Logger) (txHash [
 
 func generateCollisionCheckString(
 	txToUpdateHash [32]byte,
-	chParams *crypto.ChameleonHashParameters,
+	parameters *crypto.ChameleonHashParameters,
 	newData []byte,
-) (newChCheckString *crypto.ChameleonHashCheckString) {
+) (newCheckString *crypto.ChameleonHashCheckString) {
 	// First we need to query the Tx to update.
 	var txToUpdate protocol.Transaction
 	txToUpdate = cstorage.ReadTransaction(txToUpdateHash)
@@ -109,7 +109,7 @@ func generateCollisionCheckString(
 	fmt.Printf("TX to update %s", txToUpdate.String())
 
 	// Then we have to save the old check string and the SHA3 hash before we mutate the tx.
-	oldChCheckString := txToUpdate.GetChCheckString()
+	oldCheckString := txToUpdate.GetCheckString()
 	oldSHA3 := txToUpdate.SHA3()
 	oldHashInput := oldSHA3[:]
 
@@ -120,11 +120,11 @@ func generateCollisionCheckString(
 	// With the new hash input we compute a hash collision and get the new check string.
 	newSHA3 := txToUpdate.SHA3()
 	newHashInput := newSHA3[:]
-	newChCheckString = crypto.GenerateChCollision(chParams, oldChCheckString, &oldHashInput, &newHashInput)
+	newCheckString = crypto.GenerateChCollision(parameters, oldCheckString, &oldHashInput, &newHashInput)
 
 	// We update the TxToUpdate record in our local db.
-	txToUpdate.SetChCheckString(newChCheckString)
+	txToUpdate.SetCheckString(newCheckString)
 	cstorage.WriteTransaction(txToUpdateHash, txToUpdate)
 
-	return newChCheckString
+	return newCheckString
 }

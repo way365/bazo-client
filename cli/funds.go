@@ -17,7 +17,7 @@ func GetFundsCommand(logger *log.Logger) cli.Command {
 				From:        c.String("from"),
 				To:          c.String("to"),
 				MultiSigKey: c.String("multisig"),
-				ChParams:    c.String("chparams"),
+				Parameters:  c.String("chparams"),
 				Amount:      c.Uint64("amount"),
 				Fee:         c.Uint64("fee"),
 				TxCount:     c.Int("txcount"),

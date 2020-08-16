@@ -90,14 +90,14 @@ func ResolvePrivateKey(privateKeyOrFilename string) (privateKey *ecdsa.PrivateKe
 // Resolves a set of chameleon hash parameters from a provided string.
 // The string can either hold the parameters directly
 // or a filename pointing to the ch-parmas file.
-func ResolveChParams(chParamsOrFilename string) (chParams *crypto.ChameleonHashParameters, err error) {
-	if len(chParamsOrFilename) == 0 {
+func ResolveParameters(parametersOrFilename string) (parameters *crypto.ChameleonHashParameters, err error) {
+	if len(parametersOrFilename) == 0 {
 		return nil, err
 	}
 
 	// CH params provided indirectly by a filename.
-	if len(chParamsOrFilename) > 0 && strings.Contains(chParamsOrFilename, ".txt") {
-		chParams, err = crypto.GetOrCreateChParamsFromFile(chParamsOrFilename)
+	if len(parametersOrFilename) > 0 && strings.Contains(parametersOrFilename, ".txt") {
+		parameters, err = crypto.GetOrCreateParametersFromFile(parametersOrFilename)
 		if err != nil {
 			return nil, err
 		}
@@ -105,41 +105,41 @@ func ResolveChParams(chParamsOrFilename string) (chParams *crypto.ChameleonHashP
 
 	// In this case, the parameters are provided directly.
 	// Split the string by \n or \t
-	params := strings.Fields(chParamsOrFilename)
+	lines := strings.Fields(parametersOrFilename)
 	var g, p, q, hk, tk string
-	var size = crypto.CH_PARAM_SIZE
+	var lenOfOneParameter = crypto.CH_PARAM_SIZE
 
 	// Parameters are provided as one consecutive string, no \n delimiter.
-	if len(params) == 1 && len(chParamsOrFilename) == 4*size || len(chParamsOrFilename) == 5*size {
-		params = make([]string, 5)
-		params[0] = chParamsOrFilename[:size]
-		params[1] = chParamsOrFilename[size : 2*size]
-		params[2] = chParamsOrFilename[2*size : 3*size]
-		params[3] = chParamsOrFilename[3*size : 4*size]
+	if len(lines) == 1 && len(parametersOrFilename) == 4*lenOfOneParameter || len(parametersOrFilename) == 5*lenOfOneParameter {
+		lines = make([]string, 5)
+		lines[0] = parametersOrFilename[:lenOfOneParameter]
+		lines[1] = parametersOrFilename[lenOfOneParameter : 2*lenOfOneParameter]
+		lines[2] = parametersOrFilename[2*lenOfOneParameter : 3*lenOfOneParameter]
+		lines[3] = parametersOrFilename[3*lenOfOneParameter : 4*lenOfOneParameter]
 
 		// If trapdoor is included.
-		if len(chParamsOrFilename) == 5 {
-			params[4] = chParamsOrFilename[4*size : 5*size]
+		if len(parametersOrFilename) == 5 {
+			lines[4] = parametersOrFilename[4*lenOfOneParameter : 5*lenOfOneParameter]
 		}
 	}
 
 	// Chameleon hash parameters with and w/o trapdoor key.
-	if len(params) == 4 || len(params) == 5 {
-		g = params[0]
-		p = params[1]
-		q = params[2]
-		hk = params[3]
+	if len(lines) == 4 || len(lines) == 5 {
+		g = lines[0]
+		p = lines[1]
+		q = lines[2]
+		hk = lines[3]
 
 		// If trapdoor is included.
-		if len(params) == 5 {
-			tk = params[4]
+		if len(lines) == 5 {
+			tk = lines[4]
 		}
 
-		chParams, err = crypto.GetChParamsFromString(g, p, q, hk, tk)
+		parameters, err = crypto.GetParametersFromString(g, p, q, hk, tk)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	return chParams, nil
+	return parameters, nil
 }

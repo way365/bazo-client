@@ -9,7 +9,7 @@ type FundsArgs struct {
 	From        string `json:"from"`
 	To          string `json:"to"`
 	MultiSigKey string `json:"multi_sig"`
-	ChParams    string `json:"ch_params"`
+	Parameters  string `json:"ch_params"`
 	Amount      uint64 `json:"amount"`
 	Fee         uint64 `json:"fee"`
 	TxCount     int    `json:"tx_count"`

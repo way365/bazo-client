@@ -74,7 +74,7 @@ func getCreateAccountCommand(logger *log.Logger) cli.Command {
 				Fee:        c.Uint64("fee"),
 				RootWallet: c.String("rootwallet"),
 				Wallet:     c.String("wallet"),
-				ChParams:   c.String("chparams"),
+				Parameters: c.String("chparams"),
 				Data:       c.String("data"),
 			}
 
@@ -113,7 +113,7 @@ func getAddAccountCommand(logger *log.Logger) cli.Command {
 				Fee:        c.Uint64("fee"),
 				RootWallet: c.String("rootwallet"),
 				Address:    c.String("address"),
-				ChParams:   c.String("chparams"),
+				Parameters: c.String("chparams"),
 			}
 
 			return services.AddAccount(args, logger)
