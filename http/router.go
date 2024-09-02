@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/julwil/bazo-client/util"
+	"github.com/way365/bazo-client/util"
 	"log"
 	"net/http"
 )

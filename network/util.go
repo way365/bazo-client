@@ -5,8 +5,8 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/julwil/bazo-client/util"
-	"github.com/julwil/bazo-miner/p2p"
+	"github.com/way365/bazo-client/util"
+	"github.com/way365/bazo-miner/p2p"
 	"time"
 )
 
@@ -70,7 +70,7 @@ func readHeader(reader *bufio.Reader) (*p2p.Header, error) {
 	return header, nil
 }
 
-//Decoupled functionality for testing reasons
+// Decoupled functionality for testing reasons
 func extractHeader(headerData []byte) *p2p.Header {
 
 	header := new(p2p.Header)

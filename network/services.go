@@ -1,11 +1,11 @@
 package network
 
 import (
-	"github.com/julwil/bazo-client/util"
+	"github.com/way365/bazo-client/util"
 	"time"
 )
 
-//Single goroutine that makes sure the system is well connected.
+// Single goroutine that makes sure the system is well connected.
 func checkHealthService() {
 	for {
 		time.Sleep(util.HEALTH_CHECK_INTERVAL * time.Second)

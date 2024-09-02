@@ -2,12 +2,12 @@ package services
 
 import (
 	"errors"
-	"github.com/julwil/bazo-client/args"
-	"github.com/julwil/bazo-client/network"
-	"github.com/julwil/bazo-client/util"
-	"github.com/julwil/bazo-miner/crypto"
-	"github.com/julwil/bazo-miner/p2p"
-	"github.com/julwil/bazo-miner/protocol"
+	"github.com/way365/bazo-client/args"
+	"github.com/way365/bazo-client/network"
+	"github.com/way365/bazo-client/util"
+	"github.com/way365/bazo-miner/crypto"
+	"github.com/way365/bazo-miner/p2p"
+	"github.com/way365/bazo-miner/protocol"
 	"log"
 )
 

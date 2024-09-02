@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/julwil/bazo-client/cli"
-	"github.com/julwil/bazo-client/cstorage"
-	"github.com/julwil/bazo-client/network"
-	"github.com/julwil/bazo-client/services"
-	"github.com/julwil/bazo-client/util"
-	"github.com/julwil/bazo-miner/p2p"
 	cli2 "github.com/urfave/cli"
+	"github.com/way365/bazo-client/cli"
+	"github.com/way365/bazo-client/cstorage"
+	"github.com/way365/bazo-client/network"
+	"github.com/way365/bazo-client/services"
+	"github.com/way365/bazo-client/util"
+	"github.com/way365/bazo-miner/p2p"
 	"os"
 )
 

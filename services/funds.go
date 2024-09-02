@@ -3,10 +3,10 @@ package services
 import (
 	"crypto/ecdsa"
 	"crypto/rand"
-	"github.com/julwil/bazo-client/args"
-	"github.com/julwil/bazo-client/cstorage"
-	"github.com/julwil/bazo-miner/crypto"
-	"github.com/julwil/bazo-miner/protocol"
+	"github.com/way365/bazo-client/args"
+	"github.com/way365/bazo-client/cstorage"
+	"github.com/way365/bazo-miner/crypto"
+	"github.com/way365/bazo-miner/protocol"
 	"log"
 )
 

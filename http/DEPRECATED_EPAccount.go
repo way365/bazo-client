@@ -2,9 +2,9 @@ package http
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/julwil/bazo-client/network"
-	"github.com/julwil/bazo-client/services"
-	"github.com/julwil/bazo-miner/protocol"
+	"github.com/way365/bazo-client/network"
+	"github.com/way365/bazo-client/services"
+	"github.com/way365/bazo-miner/protocol"
 	"math/big"
 	"net/http"
 )

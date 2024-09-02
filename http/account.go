@@ -3,8 +3,8 @@ package http
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/julwil/bazo-client/args"
-	"github.com/julwil/bazo-client/services"
+	"github.com/way365/bazo-client/args"
+	"github.com/way365/bazo-client/services"
 	"net/http"
 )
 

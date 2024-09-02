@@ -2,11 +2,11 @@ package services
 
 import (
 	"fmt"
-	"github.com/julwil/bazo-client/cstorage"
-	"github.com/julwil/bazo-client/network"
-	"github.com/julwil/bazo-miner/miner"
-	"github.com/julwil/bazo-miner/p2p"
-	"github.com/julwil/bazo-miner/protocol"
+	"github.com/way365/bazo-client/cstorage"
+	"github.com/way365/bazo-client/network"
+	"github.com/way365/bazo-miner/miner"
+	"github.com/way365/bazo-miner/p2p"
+	"github.com/way365/bazo-miner/protocol"
 )
 
 var (
@@ -20,7 +20,7 @@ var (
 	UnsignedFundsTx  = make(map[[32]byte]*protocol.FundsTx)
 )
 
-//Update allBlockHeaders to the latest header. Start listening to broadcasted headers after.
+// Update allBlockHeaders to the latest header. Start listening to broadcasted headers after.
 func Sync() {
 	loadBlockHeaders()
 	go incomingBlockHeaders()

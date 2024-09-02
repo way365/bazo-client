@@ -2,8 +2,8 @@ package args
 
 import (
 	"crypto/ecdsa"
-	"github.com/julwil/bazo-miner/crypto"
-	"github.com/julwil/bazo-miner/protocol"
+	"github.com/way365/bazo-miner/crypto"
+	"github.com/way365/bazo-miner/protocol"
 	"strings"
 )
 

@@ -2,8 +2,8 @@ package network
 
 import (
 	"encoding/binary"
-	"github.com/julwil/bazo-miner/p2p"
-	"github.com/julwil/bazo-miner/protocol"
+	"github.com/way365/bazo-miner/p2p"
+	"github.com/way365/bazo-miner/protocol"
 	"strconv"
 )
 
@@ -92,7 +92,7 @@ func processNeighborRes(p *peer, payload []byte) {
 	}
 }
 
-//Split the processNeighborRes function in two for cleaner testing.
+// Split the processNeighborRes function in two for cleaner testing.
 func _processNeighborRes(payload []byte) (ipportList []string) {
 	index := 0
 	for cnt := 0; cnt < len(payload)/(p2p.IPV4ADDR_SIZE+p2p.PORT_SIZE); cnt++ {

@@ -2,9 +2,9 @@ package cli
 
 import (
 	"errors"
-	"github.com/julwil/bazo-client/args"
-	"github.com/julwil/bazo-client/services"
 	"github.com/urfave/cli"
+	"github.com/way365/bazo-client/args"
+	"github.com/way365/bazo-client/services"
 	"log"
 )
 

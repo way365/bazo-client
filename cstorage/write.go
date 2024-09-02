@@ -3,7 +3,7 @@ package cstorage
 import (
 	"errors"
 	"github.com/boltdb/bolt"
-	"github.com/julwil/bazo-miner/protocol"
+	"github.com/way365/bazo-miner/protocol"
 )
 
 func WriteBlockHeader(header *protocol.Block) (err error) {
@@ -17,7 +17,7 @@ func WriteBlockHeader(header *protocol.Block) (err error) {
 	return err
 }
 
-//Before saving the last block header, delete all existing entries.
+// Before saving the last block header, delete all existing entries.
 func WriteLastBlockHeader(header *protocol.Block) (err error) {
 	db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("lastblockheader"))

@@ -3,9 +3,9 @@ package network
 import (
 	"errors"
 	"fmt"
-	"github.com/julwil/bazo-client/util"
-	"github.com/julwil/bazo-miner/p2p"
-	"github.com/julwil/bazo-miner/protocol"
+	"github.com/way365/bazo-client/util"
+	"github.com/way365/bazo-miner/p2p"
+	"github.com/way365/bazo-miner/protocol"
 )
 
 func BlockReq(blockHash []byte) error {

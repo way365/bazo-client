@@ -3,8 +3,8 @@ package services
 import (
 	"errors"
 	"fmt"
-	"github.com/julwil/bazo-client/network"
-	"github.com/julwil/bazo-miner/protocol"
+	"github.com/way365/bazo-client/network"
+	"github.com/way365/bazo-miner/protocol"
 )
 
 //TODO Validate block merkle root.

@@ -3,7 +3,7 @@ package cstorage
 import (
 	"fmt"
 	"github.com/boltdb/bolt"
-	"github.com/julwil/bazo-client/util"
+	"github.com/way365/bazo-client/util"
 	"log"
 	"time"
 )
@@ -24,7 +24,7 @@ const (
 	UPDATE_TX_BUCKET         = "update_transactions"
 )
 
-//Entry function for the storage package
+// Entry function for the storage package
 func Init(dbname string) {
 	logger = util.InitLogger()
 

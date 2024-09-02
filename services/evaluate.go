@@ -1,8 +1,8 @@
 package services
 
 import (
-	"github.com/julwil/bazo-client/network"
-	"github.com/julwil/bazo-miner/protocol"
+	"github.com/way365/bazo-client/network"
+	"github.com/way365/bazo-miner/protocol"
 )
 
 func getRelevantBlocks(relevantBlockHeaders []*protocol.Block) (relevantBlocks []*protocol.Block, err error) {

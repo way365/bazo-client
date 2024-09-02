@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/julwil/bazo-client/cstorage"
-	"github.com/julwil/bazo-client/services"
+	"github.com/way365/bazo-client/cstorage"
+	"github.com/way365/bazo-client/services"
 	"net/http"
 )
 
